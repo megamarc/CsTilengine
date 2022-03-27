@@ -427,12 +427,12 @@ namespace Tilengine
             public int index;
 
             /// <summary>
-            /// Sprite is enabled
+            /// Sprite is enabled.
             /// </summary>
             public bool enabled;
 
             /// <summary>
-            /// Pixel collision detection is enabled
+            /// Pixel collision detection is enabled.
             /// </summary>
             public bool collision;
         }
@@ -468,12 +468,12 @@ namespace Tilengine
             FLAG_ROTATE = 1 << 13,
 
             /// <summary>
-            /// Tile goes in front of sprite layer
+            /// Tile goes in front of sprite layer.
             /// </summary>
             FLAG_PRIORITY = 1 << 12,
 
             /// <summary>
-            /// Sprite won't be drawn inside masked region
+            /// Sprite won't be drawn inside masked region.
             /// </summary>
             FLAG_MASKED = 1 << 11
         }
@@ -1219,18 +1219,18 @@ namespace Tilengine
         /// Creates a window for rendering.
         /// </summary>
         /// <remarks>
-        ///     Creates a host window with basic user input for Tilengine. <br/>
-        ///     If fullscreen, it uses the desktop resolution and stretches the output resolution
-        ///     with aspect correction, letterboxing or pillarboxing as needed. <br/>
-        ///     If windowed, it creates a centered window that is the maximum
-        ///     possible integer multiple of the resolution configured in TLN_Init()
+        /// Creates a host window with basic user input for Tilengine. <br/>
+        /// If fullscreen, it uses the desktop resolution and stretches the output resolution
+        /// with aspect correction, letterboxing or pillarboxing as needed. <br/>
+        /// If windowed, it creates a centered window that is the maximum
+        /// possible integer multiple of the resolution configured in TLN_Init()
         /// </remarks>
         /// <param name="overlay">
-        ///     Optional path of a bmp file to overlay (for emulating RGB mask, scanlines, etc.)
+        /// Optional path of a bmp file to overlay (for emulating RGB mask, scanlines, etc.)
         /// </param>
         /// <param name="flags">
-        ///     Mask of the possible creation flags: <br/>
-        ///     CWF_FULLSCREEN, CWF_VSYNC, CWF_S1 - CWF_S5 (scaling factor, none = auto max)
+        /// Mask of the possible creation flags: <br/>
+        /// CWF_FULLSCREEN, CWF_VSYNC, CWF_S1 - CWF_S5 (scaling factor, none = auto max)
         /// </param>
         /// <returns>true if the window was created or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -1241,18 +1241,18 @@ namespace Tilengine
         /// Creates a multi-threaded window for rendering.
         /// </summary>
         /// <remarks>
-        ///     Creates a host window with basic user input for Tilengine. <br/>
-        ///     If fullscreen, it uses the desktop resolution and stretches the output resolution
-        ///     with aspect correction, letterboxing or pillarboxing as needed. <br/>
-        ///     If windowed, it creates a centered window that is the maximum
-        ///     possible integer multiple of the resolution configured in TLN_Init()
+        /// Creates a host window with basic user input for Tilengine. <br/>
+        /// If fullscreen, it uses the desktop resolution and stretches the output resolution
+        /// with aspect correction, letterboxing or pillarboxing as needed. <br/>
+        /// If windowed, it creates a centered window that is the maximum
+        /// possible integer multiple of the resolution configured in TLN_Init()
         /// </remarks>
         /// <param name="overlay">
-        ///     Optional path of a bmp file to overlay (for emulating RGB mask, scanlines, etc.)
+        /// Optional path of a bmp file to overlay (for emulating RGB mask, scanlines, etc.)
         /// </param>
         /// <param name="flags">
-        ///     Mask of the possible creation flags: <br/>
-        ///     CWF_FULLSCREEN, CWF_VSYNC, CWF_S1 - CWF_S5 (scaling factor, none = auto max)
+        /// Mask of the possible creation flags: <br/>
+        /// CWF_FULLSCREEN, CWF_VSYNC, CWF_S1 - CWF_S5 (scaling factor, none = auto max)
         /// </param>
         /// <returns>true if the window was created or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -1561,8 +1561,8 @@ namespace Tilengine
         /// <param name="spriteset">Spriteset to set the data.</param>
         /// <param name="entry">The entry index inside the spriteset to modify [0, num_sprites - 1].</param>
         /// <param name="data">
-        ///     Pointer to a user-provided <see cref="TLN_SpriteData"/>
-        ///     structure with the sprite description.
+        /// Pointer to a user-provided <see cref="TLN_SpriteData"/>
+        /// structure with the sprite description.
         /// </param>
         /// <param name="pixels">Pointer to source pixel data.</param>
         /// <param name="pitch">Number of bytes for each scanline of the source pixel data.</param>
@@ -1595,10 +1595,11 @@ namespace Tilengine
         /// <param name="height">Height of each tile (must be multiple of 8)</param>
         /// <param name="palette">Reference to the palette to assign</param>
         /// <param name="sp">
-        ///     Optional reference to the optional sequence pack with associated tileset animations. (Nullable)
+        /// Optional reference to the optional sequence pack with
+        /// associated tileset animations. Can be NULL.
         /// </param>
         /// <param name="attributes">
-        ///     Optional array of attributes, one for each tile. (Nullable)
+        /// Optional array of attributes, one for each tile. Can be NULL.
         /// </param>
         /// <returns>Reference to the created tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -1608,7 +1609,7 @@ namespace Tilengine
         /// Creates a multiple image-based tileset.
         /// </summary>
         /// <param name="numtiles">Number of tiles that the tileset will hold.</param>
-        /// <param name="images">Array of image structures, one for each tile. (Nullable)</param>
+        /// <param name="images">Array of image structures, one for each tile. Can be NULL.</param>
         /// <returns>Reference to the created tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CreateImageTileset(int numtiles, TLN_TileImage[]? images);
@@ -1713,10 +1714,10 @@ namespace Tilengine
         /// <param name="cols">Number of cols (horizontal dimension)</param>
         /// <param name="tiles">Array of tiles with data (see struct <see cref="TLN_Tile"/>)</param>
         /// <param name="bgcolor">Background color value (RGB32 packed)</param>
-        /// <param name="tileset">Optional reference to associated tileset. (Nullable)</param>
+        /// <param name="tileset">Optional reference to associated tileset. Can be NULL.</param>
         /// <returns>Reference to the created tilemap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_CreateTilemap(int rows, int cols, TLN_Tile[] tiles, uint bgcolor, IntPtr tileset);
+        public static extern IntPtr TLN_CreateTilemap(int rows, int cols, TLN_Tile[] tiles, uint bgcolor, IntPtr? tileset);
 
         /// <summary>
         /// Loads a tilemap layer from a Tiled .tmx file.
