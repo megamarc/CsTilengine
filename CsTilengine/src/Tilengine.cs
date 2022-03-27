@@ -1478,29 +1478,107 @@ namespace Tilengine
 
         #region Spriteset
 
+        /// <summary>
+        /// Creates a new spriteset.
+        /// </summary>
+        /// <param name="bitmap">Bitmap reference containing the sprite graphics.</param>
+        /// <param name="data">Array of TLN_SpriteData structures with sprite descriptions.</param>
+        /// <param name="num_entries">Number of entries in the TLN_SpriteData array.</param>
+        /// <returns>
+        /// Reference to the created spriteset, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_CreateSpriteset(IntPtr bitmap, TLN_SpriteData data, int num_entries);
+        public static extern IntPtr TLN_CreateSpriteset(IntPtr bitmap, TLN_SpriteData[] data, int num_entries);
 
+        /// <summary>
+        /// Loads a spriteset from an image png and its associated atlas descriptor.
+        /// </summary>
+        /// <remarks>
+        /// The spriteset comes in a pair of files: an image file (bmp or png)
+        /// and a standard atlas descriptor (json, csv or txt)
+        /// The supported json format is the array.
+        /// </remarks>
+        /// <param name="name">
+        /// Base name of the files containing the spriteset, with or without .png extension.
+        /// </param>
+        /// <returns>
+        /// Reference to the newly loaded spriteset, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_LoadSpriteset(string name);
 
+        /// <summary>
+        /// Creates a copy of the specified spriteset and its associated palette.
+        /// </summary>
+        /// <param name="src">Spriteset to clone.</param>
+        /// <returns>
+        /// Reference to the newly cloned spriteset, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneSpriteset(IntPtr src);
 
+        /// <summary>
+        /// Query the details about the specified sprite inside a spriteset.
+        /// </summary>
+        /// <param name="spriteset">Reference to the spriteset to get info about.</param>
+        /// <param name="entry">The entry index inside the spriteset [0, num_sprites - 1]</param>
+        /// <param name="info">
+        /// Pointer to application-allocated <see cref="TLN_SpriteInfo"/>
+        /// structure that will receive the data.
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_GetSpriteInfo(IntPtr spriteset, int entry, TLN_SpriteInfo info);
+        public static extern bool TLN_GetSpriteInfo(IntPtr spriteset, int entry, out TLN_SpriteInfo info);
 
+        /// <summary>
+        /// Returns a reference to the palette associated to the specified spriteset.
+        /// </summary>
+        /// <remarks>
+        /// The palette of a spriteset is created at load time and cannot be modified. When <see cref="TLN_ConfigSprite"/>
+        /// function is used to setup a sprite, the palette associated with the specified spriteset is automatically
+        /// assigned to that sprite, but it can be later replaced with <see cref="TLN_SetSpritePalette"/>.
+        /// </remarks>
+        /// <param name="spriteset">Spriteset to obtain the palette.</param>
+        /// <returns>
+        /// Reference to the palette, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetSpritesetPalette(IntPtr spriteset);
 
+        /// <summary>
+        /// Retrieves a reference to the palette associated to the specified spriteset.
+        /// </summary>
+        /// <param name="spriteset">Spriteset where to find the sprite.</param>
+        /// <param name="name">Name of the sprite to find.</param>
+        /// <returns>Sprite index [0, num_sprites - 1] if found, or -1 if not found.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int TLN_FindSpritesetSprite(IntPtr spriteset, string name);
 
+        /// <summary>
+        /// Sets attributes and pixels of a given sprite inside a spriteset.
+        /// </summary>
+        /// <param name="spriteset">Spriteset to set the data.</param>
+        /// <param name="entry">The entry index inside the spriteset to modify [0, num_sprites - 1].</param>
+        /// <param name="data">
+        ///     Pointer to a user-provided <see cref="TLN_SpriteData"/>
+        ///     structure with the sprite description.
+        /// </param>
+        /// <param name="pixels">Pointer to source pixel data.</param>
+        /// <param name="pitch">Number of bytes for each scanline of the source pixel data.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpritesetData(IntPtr spriteset, int entry, TLN_SpriteData[] data, IntPtr pixels, int pitch);
 
+        /// <summary>
+        /// Deletes the specified spriteset and frees up memory.
+        /// </summary>
+        /// <remarks>
+        /// <b>Don't delete a spriteset which is attached by a sprite.</b>
+        /// </remarks>
+        /// <param name="Spriteset">Spriteset to delete.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DeleteSpriteset(IntPtr Spriteset);
@@ -1509,37 +1587,117 @@ namespace Tilengine
 
         #region Tileset
 
+        /// <summary>
+        /// Creates a tile-based tileset.
+        /// </summary>
+        /// <param name="numtiles">Number of tiles that the tileset will hold.</param>
+        /// <param name="width">Width of each tile (must be multiple of 8)</param>
+        /// <param name="height">Height of each tile (must be multiple of 8)</param>
+        /// <param name="palette">Reference to the palette to assign</param>
+        /// <param name="sp">
+        ///     Optional reference to the optional sequence pack with associated tileset animations. (Nullable)
+        /// </param>
+        /// <param name="attributes">
+        ///     Optional array of attributes, one for each tile. (Nullable)
+        /// </param>
+        /// <returns>Reference to the created tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_CreateTileset(int numtiles, int width, int height, IntPtr palette, IntPtr sp, TLN_TileAttribute[] attributes);
+        public static extern IntPtr TLN_CreateTileset(int numtiles, int width, int height, IntPtr palette, IntPtr? sp, TLN_TileAttribute[]? attributes);
 
+        /// <summary>
+        /// Creates a multiple image-based tileset.
+        /// </summary>
+        /// <param name="numtiles">Number of tiles that the tileset will hold.</param>
+        /// <param name="images">Array of image structures, one for each tile. (Nullable)</param>
+        /// <returns>Reference to the created tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_CreateImageTileset(int numtiles, TLN_TileImage[] images);
+        public static extern IntPtr TLN_CreateImageTileset(int numtiles, TLN_TileImage[]? images);
 
+        /// <summary>
+        /// Loads a tileset from a Tiled TSX file.
+        /// </summary>
+        /// <remarks>
+        /// An associated palette is also created, it can be obtained by calling <see cref="TLN_GetTilesetPalette"/>
+        /// </remarks>
+        /// <param name="filename">TSX file to load.</param>
+        /// <returns>Reference to the newly loaded tileset or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr TLN_LoadTileset(string filename);
 
+        /// <summary>
+        /// Creates a copy of the specified tileset and its associated palette.
+        /// </summary>
+        /// <param name="src">Tileset to clone</param>
+        /// <returns>A reference to the newly cloned tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneTileset(IntPtr src);
 
+        /// <summary>
+        /// Sets pixel data for a tile in a tile-based tileset.
+        /// </summary>
+        /// <param name="tileset">Reference to the tileset.</param>
+        /// <param name="entry">Number of tile to set [0, num_tiles - 1]</param>
+        /// <param name="srcdata">Pointer to pixel data to set</param>
+        /// <param name="srcpitch">Bytes per line of source data</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetTilesetPixels(IntPtr tileset, int entry, byte[] srcdata, int srcpitch);
 
+        /// <summary>
+        /// Retrieves the width in pixels of each individual tile in the tileset.
+        /// </summary>
+        /// <param name="tileset">Reference to the tileset to get info from.</param>
+        /// <returns>The tile width.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetTileWidth(IntPtr tileset);
 
+        /// <summary>
+        /// Retrieves the height in pixels of each individual tile in the tileset.
+        /// </summary>
+        /// <param name="tileset">Reference to the tileset to get info from.</param>
+        /// <returns>The tile height.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetTileHeight(IntPtr tileset);
 
+        /// <summary>
+        /// Retrieves the number of different tiles in a tileset.
+        /// </summary>
+        /// <param name="tileset">Reference to the tileset to get info from</param>
+        /// <returns>The amount of tiles.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetTilesetNumTiles(IntPtr tileset);
 
+        /// <summary>
+        /// Retrieves a reference to the palette associated to the specified tileset.
+        /// </summary>
+        /// <remarks>
+        /// The palette of a tileset is created at load time and cannot be modified. <br/>
+        /// When <see cref="TLN_SetLayer"/> function is used to attach a tileset to a layer,
+        /// the palette associated with the specified tileset is automatically assigned to
+        /// that layer, but it can be later replaced with <see cref="TLN_SetLayerPalette"/>
+        /// </remarks>
+        /// <param name="tileset">Reference to the tileset to get the palette.</param>
+        /// <returns>Reference to the palette or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetTilesetPalette(IntPtr tileset);
 
+        /// <summary>
+        /// Retrieves a reference to the optional sequence pack associated to the specified tileset.
+        /// </summary>
+        /// <param name="tileset">Reference to the tileset to get the palette</param>
+        /// <returns>Reference to the sequencepack or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetTilesetSequencePack(IntPtr tileset);
 
+        /// <summary>
+        /// Deletes the specified tileset and frees up memory.
+        /// </summary>
+        /// <remarks>
+        /// <b>Don't delete a tileset which is attached to a layer.</b>
+        /// </remarks>
+        /// <param name="tileset">Tileset to delete</param>
+        /// <returns></returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DeleteTileset(IntPtr tileset);
@@ -1548,36 +1706,110 @@ namespace Tilengine
 
         #region Tilemap
 
+        /// <summary>
+        /// Creates a new tilemap.
+        /// </summary>
+        /// <param name="rows">Number of rows (vertical dimension)</param>
+        /// <param name="cols">Number of cols (horizontal dimension)</param>
+        /// <param name="tiles">Array of tiles with data (see struct <see cref="TLN_Tile"/>)</param>
+        /// <param name="bgcolor">Background color value (RGB32 packed)</param>
+        /// <param name="tileset">Optional reference to associated tileset. (Nullable)</param>
+        /// <returns>Reference to the created tilemap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CreateTilemap(int rows, int cols, TLN_Tile[] tiles, uint bgcolor, IntPtr tileset);
 
+        /// <summary>
+        /// Loads a tilemap layer from a Tiled .tmx file.
+        /// </summary>
+        /// <param name="filename">TMX file with the tilemap.</param>
+        /// <param name="layername">Optional name of the layer inside the tmx file to load. Set to NULL to load the first layer.</param>
+        /// <returns>Reference to the newly loaded tilemap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr TLN_LoadTilemap(string filename, string? layername);
 
+        /// <summary>
+        /// Creates a copy of the specified tilemap.
+        /// </summary>
+        /// <param name="src">Reference to the tilemap to clone.</param>
+        /// <returns>A reference to the newly cloned tilemap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneTilemap(IntPtr src);
 
+        /// <summary>
+        /// Returns the number of vertical tiles in the tilemap.
+        /// </summary>
+        /// <param name="tilemap">Reference of the tilemap.</param>
+        /// <returns>The number of vertical lines.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetTilemapRows(IntPtr tilemap);
 
+        /// <summary>
+        /// Returns the number of horizontal tiles in the tilemap.
+        /// </summary>
+        /// <param name="tilemap">Reference of the tilemap.</param>
+        /// <returns>The number of horizontal lines.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetTilemapCols(IntPtr tilemap);
 
+        /// <summary>
+        /// Returns the optional associated tileset to the specified tilemap.
+        /// </summary>
+        /// <param name="tilemap">Reference of the tilemap.</param>
+        /// <returns>Reference to the associated tileset.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetTilemapTileset(IntPtr tilemap);
 
+        /// <summary>
+        /// Gets data of a single tile inside a tilemap.
+        /// </summary>
+        /// <param name="tilemap">Reference of the tilemap to get the tile.</param>
+        /// <param name="row">Vertical location of the tile.</param>
+        /// <param name="col">Horizontal location of the tile.</param>
+        /// <param name="tile">Reference to an application allocated <see cref="TLN_Tile"/> which will contain the data.</param>
+        /// <returns>true if successful or false if an invalid tilemap reference was supplied.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_GetTilemapTile(IntPtr tilemap, int row, int col, TLN_Tile tile);
+        public static extern bool TLN_GetTilemapTile(IntPtr tilemap, int row, int col, out TLN_Tile tile);
 
+        /// <summary>
+        /// Sets a tile of a tilemap.
+        /// </summary>
+        /// <param name="tilemap">Reference to the tilemap.</param>
+        /// <param name="row">Row (vertical position) of the tile [0 - num_rows - 1]</param>
+        /// <param name="col">Column (horizontal position) of the tile [0 - num_cols - 1]</param>
+        /// <param name="tile">Reference to the tile to set, or NULL to set an empty tile.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetTilemapTile(IntPtr tilemap, int row, int col, TLN_Tile tile);
+        public static extern bool TLN_SetTilemapTile(IntPtr tilemap, int row, int col, TLN_Tile? tile);
 
+        /// <summary>
+        /// Copies blocks of tiles between two tilemaps.
+        /// </summary>
+        /// <remarks>
+        /// Use this function to implement tile streaming.
+        /// </remarks>
+        /// <param name="src">Reference to the source tilemap.</param>
+        /// <param name="srcrow">Starting row (vertical position) inside the source tilemap.</param>
+        /// <param name="srccol">Starting column (horizontal position) inside the source tilemap.</param>
+        /// <param name="rows">Number of rows to copy.</param>
+        /// <param name="cols">Number of columns to copy.</param>
+        /// <param name="dst">Reference to the target tilemap.</param>
+        /// <param name="dstrow">Starting row (vertical position) inside the target tilemap.</param>
+        /// <param name="dstcol">Starting column (horizontal position) inside the target tilemap.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_CopyTiles(IntPtr src, int srcrow, int srccol, int rows, int cols, IntPtr dst, int dstrow, int dstcol);
 
+        /// <summary>
+        /// Deletes the specified tilemap and frees up memory.
+        /// </summary>
+        /// <remarks>
+        /// <b>Don't delete a tilemap which is attached to a layer.</b>
+        /// </remarks>
+        /// <param name="tilemap">Reference to the tilemap to delete.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DeleteTilemap(IntPtr tilemap);
@@ -1586,38 +1818,133 @@ namespace Tilengine
 
         #region Palette
 
+        /// <summary>
+        /// Creates a new color table.
+        /// </summary>
+        /// <param name="entries">Number of color entries (typically 256)</param>
+        /// <returns>Reference to the created palette, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CreatePalette(int entries);
 
+        /// <summary>
+        /// Loads a palette from a standard .act file.
+        /// </summary>
+        /// <param name="filename">ACT file containing the palette to load.</param>
+        /// <returns>A reference to the newly loaded palette, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr TLN_LoadPalette(string filename);
 
+        /// <summary>
+        /// Creates a copy of the specified palette.
+        /// </summary>
+        /// <param name="src">Reference to the palette to clone.</param>
+        /// <returns>A reference to the newly cloned palette, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_ClonePalette(IntPtr src);
 
+        /// <summary>
+        /// Sets the RGB color value of a palette entry.
+        /// </summary>
+        /// <param name="palette">Reference to the palette to modify.</param>
+        /// <param name="color">Index of the palette entry to modify (0-255)</param>
+        /// <param name="r">Red component of the color (0-255)</param>
+        /// <param name="g">Green component of the color (0-255)</param>
+        /// <param name="b">Blue component of the color (0-255)</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetPaletteColor(IntPtr palette, int color, byte r, byte g, byte b);
 
+        /// <summary>
+        /// Mixes two palettes to create a third one.
+        /// </summary>
+        /// <param name="src1">Reference to the first source palette.</param>
+        /// <param name="src2">Reference to the second source palette.</param>
+        /// <param name="dst">Reference to the target palette.</param>
+        /// <param name="factor">
+        ///     Mixing factor.
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <term>0</term>
+        ///             <description>100% src1</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>128</term>
+        ///             <description>50% src1 | 50% src2</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>255</term>
+        ///             <description>100% src2</description>
+        ///         </item>
+        ///     </list>
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_MixPalettes(IntPtr src1, IntPtr src2, IntPtr dst, byte factor);
 
+        /// <summary>
+        /// Modifies a range of colors by adding the provided color value to the selected range. <br/>
+        /// The result is always a brighter color.
+        /// </summary>
+        /// <param name="palette">Reference to the palette to modify.</param>
+        /// <param name="r">Red component of the color (0-255)</param>
+        /// <param name="g">Green component of the color (0-255)</param>
+        /// <param name="b">Blue component of the color (0-255)</param>
+        /// <param name="start">Index of the first color entry to modify.</param>
+        /// <param name="num">Number of colors from start to modify.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_AddPaletteColor(IntPtr palette, byte r, byte g, byte b, byte start, byte num);
 
+        /// <summary>
+        /// Modifies a range of colors by subtracting the provided color value to the selected range. <br/>
+        /// The result is always a darker color.
+        /// </summary>
+        /// <param name="palette">Reference to the palette to modify.</param>
+        /// <param name="r">Red component of the color (0-255)</param>
+        /// <param name="g">Green component of the color (0-255)</param>
+        /// <param name="b">Blue component of the color (0-255)</param>
+        /// <param name="start">Index of the first color entry to modify.</param>
+        /// <param name="num">Number of colors from start to modify</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SubPaletteColor(IntPtr palette, byte r, byte g, byte b, byte start, byte num);
 
+        /// <summary>
+        /// Modifies a range of colors by modulating (normalized product) the provided color value to the selected range. <br/>
+        /// The result is always a darker color.
+        /// </summary>
+        /// <param name="palette">Reference to the palette to modify.</param>
+        /// <param name="r">Red component of the color (0-255)</param>
+        /// <param name="g">Green component of the color (0-255)</param>
+        /// <param name="b">Blue component of the color (0-255)</param>
+        /// <param name="start">Index of the first color entry to modify.</param>
+        /// <param name="num">Number of colors from start to modify.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_ModPaletteColor(IntPtr palette, byte r, byte g, byte b, byte start, byte num);
 
+        /// <summary>
+        /// Returns the color value of a palette entry.
+        /// </summary>
+        /// <param name="palette">Reference to the palette to get the color.</param>
+        /// <param name="index">Index of the palette entry to obtain (0-255)</param>
+        /// <returns>32-bit integer with the packed color in internal pixel format RGBA.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_GetPaletteData(IntPtr palette, int index);
+        public static extern uint TLN_GetPaletteData(IntPtr palette, int index);
 
+        /// <summary>
+        /// Deletes the specified palette and frees up memory.
+        /// </summary>
+        /// <remarks>
+        /// <b>Don't delete a palette which is attached to a layer or sprite.</b>
+        /// </remarks>
+        /// <param name="palette">Reference to the palette to delete.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DeletePalette(IntPtr palette);
@@ -1626,37 +1953,100 @@ namespace Tilengine
 
         #region Bitmap
 
+        /// <summary>
+        /// Creates a memory bitmap.
+        /// </summary>
+        /// <param name="width">Width in pixels</param>
+        /// <param name="height">Height in pixels</param>
+        /// <param name="bpp">Bits per pixel</param>
+        /// <returns>Reference to the created bitmap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CreateBitmap(int width, int height, int bpp);
 
+        /// <summary>
+        /// Load image file (8-bit BMP or PNG)
+        /// </summary>
+        /// <param name="filename">File name with the image</param>
+        /// <returns>Handler to the loaded image, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr TLN_LoadBitmap(string filename);
 
+        /// <summary>
+        /// Creates a copy of a bitmap
+        /// </summary>
+        /// <param name="src">Reference to the original bitmap.</param>
+        /// <returns>Reference to the created bitmap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneBitmap(IntPtr src);
 
+        /// <summary>
+        /// Gets memory access for direct pixel manipulation.
+        /// </summary>
+        /// <remarks>
+        /// Care must be taken in manipulating memory directly, as it can crash the application.
+        /// </remarks>
+        /// <param name="bitmap">Reference to the bitmap</param>
+        /// <param name="x">Starting x position [0, width - 1]</param>
+        /// <param name="y">Starting y position [0, height - 1]</param>
+        /// <returns>Pointer to pixel data starting at x,y</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetBitmapPtr(IntPtr bitmap, int x, int y);
 
+        /// <summary>
+        /// Gets the width of specified bitmap in pixels.
+        /// </summary>
+        /// <param name="bitmap">Reference to the bitmap.</param>
+        /// <returns>Width in pixels</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetBitmapWidth(IntPtr bitmap);
 
+        /// <summary>
+        /// Gets the height of specified bitmap in pixels.
+        /// </summary>
+        /// <param name="bitmap">Reference to the bitmap.</param>
+        /// <returns>Height in pixels</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetBitmapHeight(IntPtr bitmap);
 
+        /// <summary>
+        /// Gets the bits per pixel.
+        /// </summary>
+        /// <param name="bitmap">Reference to the bitmap.</param>
+        /// <returns>Bits per pixel</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetBitmapDepth(IntPtr bitmap);
 
+        /// <summary>
+        /// Gets the number of bytes per scanline (also known as a stride)
+        /// </summary>
+        /// <param name="bitmap">Reference to the bitmap.</param>
+        /// <returns>Number of bytes per scanline.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetBitmapPitch(IntPtr bitmap);
 
+        /// <summary>
+        /// Gets the associated palette of a bitmap.
+        /// </summary>
+        /// <param name="bitmap">Reference to the bitmap.</param>
+        /// <returns>Reference to the bitmap palette, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetBitmapPalette(IntPtr bitmap);
 
+        /// <summary>
+        /// Assigns a new palette to the bitmap.
+        /// </summary>
+        /// <param name="bitmap">Reference to the bitmap.</param>
+        /// <param name="palette">Reference to the palette.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetBitmapPalette(IntPtr bitmap, IntPtr palette);
 
+        /// <summary>
+        /// Deletes bitmap and frees up resources.
+        /// </summary>
+        /// <param name="bitmap">Reference to the bitmap.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DeleteBitmap(IntPtr bitmap);
@@ -1665,26 +2055,71 @@ namespace Tilengine
 
         #region Objects
 
+        /// <summary>
+        /// Creates a TLN_ObjectList.
+        /// </summary>
+        /// <remarks>
+        /// The list is created empty, it must be populated with TLN_AddSpriteToList()
+        /// and assigned to a layer with TLN_SetLayerObjects()
+        /// </remarks>
+        /// <returns>Reference to the new object list, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CreateObjectList();
 
+        /// <summary>
+        /// Adds an image-based tileset item to given TLN_ObjectList.
+        /// </summary>
+        /// <param name="list">Reference to TLN_ObjectList</param>
+        /// <param name="id">Unique ID of the tileset object.</param>
+        /// <param name="gid">Graphic Id (tile index) of the tileset object.</param>
+        /// <param name="flags">Member or combination of <see cref="TLN_TileFlags"/></param>
+        /// <param name="x">Layer-space horizontal coordinate of the top-left corner.</param>
+        /// <param name="y">Layer-space vertical coordinate of the top-left corner.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_AddTileObjectToList(IntPtr list, ushort id, ushort gid, ushort flags, int x, int y);
+        public static extern bool TLN_AddTileObjectToList(IntPtr list, ushort id, ushort gid, TLN_TileFlags flags, int x, int y);
 
+        /// <summary>
+        /// Loads an object list from a Tiled object layer.
+        /// </summary>
+        /// <param name="filename">Name of the .tmx file containing the list.</param>
+        /// <param name="layername">Name of the layer to load.</param>
+        /// <returns>Reference to the loaded object, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr TLN_LoadObjectList(string filename, string layername);
 
+        /// <summary>
+        /// Creates a copy of a given TLN_ObjectList object.
+        /// </summary>
+        /// <param name="src">Reference to the source object to clone.</param>
+        /// <returns>A reference to the newly cloned object list, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneObjectList(IntPtr src);
 
+        /// <summary>
+        /// Gets the number of items in a TLN_ObjectList
+        /// </summary>
+        /// <param name="list">Pointer to TLN_ObjectList to query.</param>
+        /// <returns>The number of items.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetListNumObjects(IntPtr list);
 
+        /// <summary>
+        /// Iterates over elements in a TLN_ObjectList
+        /// </summary>
+        /// <param name="list">Reference to TLN_ObjectList to get items.</param>
+        /// <param name="info">Pointer to user-allocated TLN_ObjectInfo struct</param>
+        /// <returns>true if an item returned, false if no more items are left.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_GetListObject(IntPtr list, TLN_ObjectInfo info);
+        public static extern bool TLN_GetListObject(IntPtr list, out TLN_ObjectInfo info);
 
+        /// <summary>
+        /// Deletes object list.
+        /// </summary>
+        /// <param name="list">Reference to list to delete.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DeleteObjectList(IntPtr list);
@@ -1693,119 +2128,389 @@ namespace Tilengine
 
         #region Layers
 
+        /// <summary>
+        /// <b>Deprecated, use <see cref="TLN_SetLayerTilemap"/> instead.</b> <br/>
+        /// Configures a background layer with the specified tileset and tilemap.
+        /// </summary>
+        /// <remarks>
+        /// This function doesn't modify the current position nor the blend mode,
+        /// but assigns the palette of the specified tileset.
+        /// </remarks>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="tileset">
+        /// Optional reference to the tileset to assign. If the tilemap has a reference to its own tileset,
+        /// passing NULL will assign the default tileset.
+        /// </param>
+        /// <param name="tilemap">Reference to the tilemap to assign.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetLayer(int nlayer, IntPtr tileset, IntPtr tilemap);
+        public static extern bool TLN_SetLayer(int nlayer, IntPtr? tileset, IntPtr tilemap);
 
+        /// <summary>
+        /// Configures a tiled background layer with the specified tilemap.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="tilemap">Reference to the tilemap to assign.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerTilemap(int nlayer, IntPtr tilemap);
 
+        /// <summary>
+        /// Configures a background layer with the specified full bitmap.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="bitmap"> Reference to the bitmap to assign.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerBitmap(int nlayer, IntPtr bitmap);
 
+        /// <summary>
+        /// Sets the color palette to the layer.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         When a layer is assigned with a tileset with the function TLN_SetLayer(), it
+        ///         automatically sets the palette of the assigned tileset to the layer.
+        ///         Use this function to override it and set another palette.
+        ///     </para>
+        ///     <para>
+        ///         Call this function inside a raster callback to change the palette in the middle
+        ///         of the frame to get raster effect colors, like and "underwater" palette below the
+        ///         water line in a partially submerged background, or a gradient palette in an area at
+        ///         the top of the screen to simulate a "depth fog effect" in a pseudo 3d background.
+        ///     </para>
+        /// </remarks>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="palette">Reference to the palette to assign to the layer.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerPalette(int nlayer, IntPtr palette);
 
+        /// <summary>
+        /// Sets the position of the tileset that corresponds to the upper left corner.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         The tileset usually spans an area much bigger than the viewport. Use this
+        ///         function to move the viewport insde the tileset. Change this value progressively
+        ///         for each frame to get a scrolling effect.
+        ///     </para>
+        ///     <para>
+        ///         Call this function inside a raster callback to get a raster scrolling effect.
+        ///         Use this to create horizontal strips of the same
+        ///         layer that move at different speeds to simulate depth. The extreme case of this effect, where
+        ///         the position is changed in each scanline, is called "line scroll" and was the technique used by
+        ///         games such as Street Fighter II to simualte a pseudo 3d floor, or many racing games to simulate
+        ///         a 3D road.
+        ///     </para>
+        /// </remarks>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="hstart">Horizontal offset in the tileset on the left side.</param>
+        /// <param name="vstart">Vertical offset in the tileset on the top side.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerPosition(int nlayer, int hstart, int vstart);
 
+        /// <summary>
+        /// Sets simple scaling.
+        /// </summary>
+        /// <remarks>
+        /// By default the scaling factor of a given layer is 1.0f, 1.0f, which means
+        /// no scaling. Use values below 1.0 to downscale (shrink) and above 1.0 to upscale (enlarge).
+        /// Call TLN_ResetLayerMode() to disable scaling.
+        /// </remarks>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="xfactor">Horizontal scale factor.</param>
+        /// <param name="yfactor">Vertical scale factor.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerScaling(int nlayer, float xfactor, float yfactor);
 
+        /// <summary>
+        /// Sets affine transform matrix to enable rotating and scaling of this layer.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         Enable the transformation matrix to give the layer the capabilities of the famous
+        ///         Super Nintendo / Famicom Mode 7. Beware that the rendering of a transformed layer
+        ///         uses more CPU than a regular layer.
+        ///     </para>
+        ///     <para>
+        ///         Unlike the original Mode 7, that could only transform
+        ///         the single layer available, Tilengine can transform all the layers at the same time. The only
+        ///         limitation is the available CPU power.
+        ///     </para>
+        ///     <para>
+        ///         Call this function inside a raster callback to set the transformation matrix in the middle of
+        ///         the frame. Setting it for each scanline is the trick used by many Super Nintendo games to fake
+        ///         a 3D perspective projection.
+        ///     </para>
+        /// </remarks>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="affine">Pointer to an TLN_Affine matrix, or NULL to disable it</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetLayerAffineTransform(int nlayer, in TLN_Affine affine);
+        public static extern bool TLN_SetLayerAffineTransform(int nlayer, in TLN_Affine? affine);
 
+        /// <summary>
+        /// Sets affine transform matrix to enable rotating and scaling of this layer.
+        /// </summary>
+        /// <remarks>
+        /// This function is a simple wrapper to TLN_SetLayerAffineTransform() without using the TLN_Affine struct.
+        /// </remarks>
+        /// <param name="layer">Layer index [0, num_layers - 1]</param>
+        /// <param name="angle">Rotation angle in degrees.</param>
+        /// <param name="dx">Horizontal displacement.</param>
+        /// <param name="dy">Vertical displacement.</param>
+        /// <param name="sx">Horizontal scaling.</param>
+        /// <param name="sy">Vertical scaling.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerTransform(int layer, float angle, float dx, float dy, float sx, float sy);
 
+        /// <summary>
+        /// Sets the table for pixel mapping render mode.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="table">User-provided array of hres*vres sized TLN_PixelMap items.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerPixelMapping(int nlayer, in TLN_PixelMap table);
 
+        /// <summary>
+        /// Sets the blending mode (transparency effect)
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="mode">Member of the <see cref="TLN_Blend"/> enumeration</param>
+        /// <param name="factor">
+        /// Deprecated as of 1.12, left for backwards compatibility but doesn't have effect.
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerBlendMode(int nlayer, TLN_Blend mode, byte factor);
 
+        /// <summary>
+        /// Enables column offset mode for this layer.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         Column offset is a value that is added or subtracted (depending on the sign) <br/>
+        ///         to the vertical position for that layer (see TLN_SetLayerPosition) for
+        ///         each column in the tilemap assigned to that layer.
+        ///     </para>
+        ///     <para>
+        ///         This feature is typically used to simulate vertical strips moving at different
+        ///         speeds, or combined with a line scroll effect, to fake rotations where the angle
+        ///         is small. The Sega Genesis games Puggsy and Chuck Rock II used this trick to simulate
+        ///         partially rotating backgrounds.
+        ///     </para>
+        /// </remarks>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="offset">Array of offsets to set. Set NULL to disable column offset mode.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerColumnOffset(int nlayer, int[] offset);
 
+        /// <summary>
+        /// Enables clipping rectangle on selected layer.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="x1">Left coordinate</param>
+        /// <param name="y1">Top coordinate</param>
+        /// <param name="x2">Right coordinate</param>
+        /// <param name="y2">Bottom coordinate</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerClip(int nlayer, int x1, int y1, int x2, int y2);
 
+        /// <summary>
+        /// Disables clipping rectangle on selected layer
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DisableLayerClip(int nlayer);
 
+        /// <summary>
+        /// Enables mosaic effect (pixelation) for selected layer.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="width">Horizontal pixel size</param>
+        /// <param name="height">Vertical pixel size</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerMosaic(int nlayer, int width, int height);
 
+        /// <summary>
+        /// Disables mosaic effect for selected layer.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DisableLayerMosaic(int nlayer);
 
+        /// <summary>
+        /// Disables scaling or affine transform for the layer.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_ResetLayerMode(int nlayer);
 
+        /// <summary>
+        /// Configures a background layer with a object list and an image-based tileset.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="objects">Reference to the TLN_ObjectList to attach.</param>
+        /// <param name="tileset">
+        /// Optional reference to the image-based tileset object.
+        /// If NULL, object list must have an attached tileset
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetLayerObjects(int nlayer, IntPtr objects, IntPtr tileset);
+        public static extern bool TLN_SetLayerObjects(int nlayer, IntPtr objects, IntPtr? tileset);
 
+        /// <summary>
+        /// Sets full layer priority, appearing in front of sprites.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="enable">Has full priority.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerPriority(int nlayer, bool enable);
 
+        /// <summary>
+        /// <b>Removed, kept for API compatibility.</b>
+        /// </summary>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerParent(int nlayer, int parent);
 
+        /// <summary>
+        /// <b>Removed, kept for API compatibility.</b>
+        /// </summary>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DisableLayerParent(int nlayer);
 
+        /// <summary>
+        /// Returns the layer width in pixels.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DisableLayer(int nlayer);
 
+        /// <summary>
+        /// Enables a layer previously disabled with <see cref="TLN_DisableLayer"/>
+        /// </summary>
+        /// <remarks>
+        /// The layer must have been previously configured. A layer without a prior configuration can't be enabled.
+        /// </remarks>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_EnableLayer(int nlayer);
 
+        /// <summary>
+        /// Gets the type of a layer.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>A member of the <see cref="TLN_LayerType"/> enumeration.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern TLN_LayerType TLN_GetLayerType(int nlayer);
 
+        /// <summary>
+        /// Gets the active palette of a layer.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>
+        /// Reference of the palette assigned to the layer, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetLayerPalette(int nlayer);
 
+        /// <summary>
+        /// Returns the active tileset on a
+        /// <see cref="TLN_LayerType.LAYER_TILE"/> or <see cref="TLN_LayerType.LAYER_OBJECT"/> layer type.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>Reference to the active tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetLayerTileset(int nlayer);
 
+        /// <summary>
+        /// Returns the active tilemap on a <see cref="TLN_LayerType.LAYER_TILE"/> layer type.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>Reference to the active tilemap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetLayerTilemap(int nlayer);
 
+        /// <summary>
+        /// Returns the active bitmap on a <see cref="TLN_LayerType.LAYER_BITMAP"/> layer type.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>Reference to the active bitmap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetLayerBitmap(int nlayer);
 
+        /// <summary>
+        /// Returns the active bitmap on a <see cref="TLN_LayerType.LAYER_OBJECT"/> layer type.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>Reference to the active objects list, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetLayerObjects(int nlayer);
 
+        /// <summary>
+        /// Gets information about the tile located in tilemap space.
+        /// </summary>
+        /// <param name="nlayer">Id of the layer to query [0, num_layers - 1]</param>
+        /// <param name="x">Horizontal position</param>
+        /// <param name="y">Vertical position</param>
+        /// <param name="info">
+        /// Pointer to an application-allocated <see cref="TLN_TileInfo"/>
+        /// struct that will receive the data.
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_GetLayerTile(int nlayer, int x, int y, in TLN_TileInfo info);
+        public static extern bool TLN_GetLayerTile(int nlayer, int x, int y, out TLN_TileInfo info);
 
+        /// <summary>
+        /// Returns the layer width in pixels.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>Layer width in pixels.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetLayerWidth(int nlayer);
 
+        /// <summary>
+        /// Returns the layer height in pixels.
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <returns>Layer height in pixels.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetLayerHeight(int nlayer);
 
