@@ -1510,9 +1510,9 @@ namespace Tilengine
         /// <summary>
         /// Creates a copy of the specified spriteset and its associated palette.
         /// </summary>
-        /// <param name="src">Spriteset to clone.</param>
+        /// <param name="src">Spriteset to copy.</param>
         /// <returns>
-        /// Reference to the newly cloned spriteset, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// Reference to the newly copied spriteset, or <see cref="IntPtr.Zero"/> if an error occurred.
         /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneSpriteset(IntPtr src);
@@ -1629,7 +1629,7 @@ namespace Tilengine
         /// Creates a copy of the specified tileset and its associated palette.
         /// </summary>
         /// <param name="src">Tileset to clone</param>
-        /// <returns>A reference to the newly cloned tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
+        /// <returns>A reference to the newly copied tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneTileset(IntPtr src);
 
@@ -1731,8 +1731,8 @@ namespace Tilengine
         /// <summary>
         /// Creates a copy of the specified tilemap.
         /// </summary>
-        /// <param name="src">Reference to the tilemap to clone.</param>
-        /// <returns>A reference to the newly cloned tilemap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
+        /// <param name="src">Reference to the tilemap to copy.</param>
+        /// <returns>A reference to the newly copied tilemap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneTilemap(IntPtr src);
 
@@ -1838,8 +1838,8 @@ namespace Tilengine
         /// <summary>
         /// Creates a copy of the specified palette.
         /// </summary>
-        /// <param name="src">Reference to the palette to clone.</param>
-        /// <returns>A reference to the newly cloned palette, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
+        /// <param name="src">Reference to the palette to copy.</param>
+        /// <returns>A reference to the newly copied palette, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_ClonePalette(IntPtr src);
 
@@ -2093,8 +2093,8 @@ namespace Tilengine
         /// <summary>
         /// Creates a copy of a given TLN_ObjectList object.
         /// </summary>
-        /// <param name="src">Reference to the source object to clone.</param>
-        /// <returns>A reference to the newly cloned object list, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
+        /// <param name="src">Reference to the source object to copy.</param>
+        /// <returns>A reference to the newly copied object list, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneObjectList(IntPtr src);
 
@@ -2293,7 +2293,7 @@ namespace Tilengine
         /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
         /// <param name="mode">Member of the <see cref="TLN_Blend"/> enumeration</param>
         /// <param name="factor">
-        /// Deprecated as of 1.12, left for backwards compatibility but doesn't have effect.
+        /// Deprecated as of 1.12, kept for backwards compatibility but doesn't have effect.
         /// </param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -2487,7 +2487,7 @@ namespace Tilengine
         /// <summary>
         /// Gets information about the tile located in tilemap space.
         /// </summary>
-        /// <param name="nlayer">Id of the layer to query [0, num_layers - 1]</param>
+        /// <param name="nlayer">Index of the layer to query [0, num_layers - 1]</param>
         /// <param name="x">Horizontal position</param>
         /// <param name="y">Vertical position</param>
         /// <param name="info">
@@ -2519,95 +2519,299 @@ namespace Tilengine
 
         #region Sprites
 
+        /// <summary>
+        /// Configures a sprite, setting spriteset and flags at once.
+        /// </summary>
+        /// <remarks>
+        /// This function also assigns the palette of the spriteset.
+        /// </remarks>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="spriteset">Reference of the spriteset containing the graphics to set.</param>
+        /// <param name="flags">Member or combination of <see cref="TLN_TileFlags"/></param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_ConfigSprite(int nsprite, IntPtr spriteset, TLN_TileFlags flags);
 
+        /// <summary>
+        /// Assigns the spriteset and its palette to a given sprite.
+        /// </summary>
+        /// <remarks>
+        /// This function also assigns the palette of the spriteset
+        /// and resets pivot to top left corner (default)
+        /// </remarks>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="spriteset">Reference of the spriteset containing the graphics to set.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpriteSet(int nsprite, IntPtr spriteset);
 
+        /// <summary>
+        /// <b>Deprecated, use <see cref="TLN_EnableSpriteFlag"/> to set flags instead.</b>
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="flags">Member or combination of <see cref="TLN_TileFlags"/></param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpriteFlags(int nsprite, TLN_TileFlags flags);
 
+        /// <summary>
+        /// Enables or disables specified flags for a sprite.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="flag">Member or combination of <see cref="TLN_TileFlags"/> to modify.</param>
+        /// <param name="enable">true to enable, false to disable.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_EnableSpriteFlag(int nsprite, TLN_TileFlags flag, bool enable);
 
+        /// <summary>
+        /// Sets sprite pivot point. Default is at (0,0) = top left corner.
+        /// </summary>
+        /// <remarks>
+        /// Sprite pivot is reset automatically to default position after changing the spriteset.
+        /// </remarks>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="px">Horizontal normalized value (0.0 = full left, 1.0 = full right)</param>
+        /// <param name="py">Vertical normalized value (0.0 = full top, 1.0 = full bottom)</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpritePivot(int nsprite, float px, float py);
 
+        /// <summary>
+        /// Sets the sprite position in screen space.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         Call this function inside a raster callback to so some vertical distortion effects
+        ///         (fake scaling) <br/>or sprite multiplexing (reusing a single sprite at different screen heights).
+        ///     </para>
+        ///     <para>
+        ///         This technique was used by some 8 bit games, with very few hardware sprites, to draw much more
+        ///         sprites in the screen, as long as they don't overlap vertically.
+        ///     </para>
+        /// </remarks>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="x">Horizontal position of pivot (0 = left margin)</param>
+        /// <param name="y">Vertical position of pivot (0 = top margin)</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpritePosition(int nsprite, int x, int y);
 
+        /// <summary>
+        /// Sets the actual graphic to the sprite.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="entry">Index of the actual picture inside the spriteset to assign.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpritePicture(int nsprite, int entry);
 
+        /// <summary>
+        /// Assigns a palette to a sprite.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="palette">Reference of the palette to assign.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpritePalette(int nsprite, IntPtr palette);
 
+        /// <summary>
+        /// Sets the blending mode (transparency effect)
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="mode">Member of the <see cref="TLN_Blend"/> enumeration.</param>
+        /// <param name="factor">
+        /// <b>Deprecated as of 1.12, kept for backwards compatibility but doesn't have effect.</b>
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpriteBlendMode(int nsprite, TLN_Blend mode, byte factor);
 
+        /// <summary>
+        /// Sets the scaling factor of the sprite.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         By default the scaling factor of a given sprite is 1.0f, 1.0f, which means
+        ///         no scaling. Use values below 1.0 to downscale (shrink) and above 1.0 to upscale (enlarge).
+        ///         Call TLN_ResetScaling() to disable scaling.
+        ///     </para>
+        ///     <para>
+        ///         The rendering of a sprite with scaling enabled requires
+        ///         somewhat more CPU power than a regular sprite.
+        ///     </para>
+        /// </remarks>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="sx">Horizontal scale factor</param>
+        /// <param name="sy">Vertical scale factor</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpriteScaling(int nsprite, float sx, float sy);
 
+        /// <summary>
+        /// Disables scaling for a given sprite.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_ResetSpriteScaling(int nsprite);
 
+        /// <summary>
+        /// Returns the index of the assigned picture from the spriteset.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <returns>Index of the assigned picture.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetSpritePicture(int nsprite);
 
+        /// <summary>
+        /// Finds an available (unused) sprite.
+        /// </summary>
+        /// <returns>Index of the first unused sprite (starting from 0) or -1 if none found.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetAvailableSprite();
 
+        /// <summary>
+        /// Enable sprite collision checking at pixel level.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         Only sprites that have collision enabled are checked between them,
+        ///         so to detect a collision between two sprites,<br/>
+        ///         both of them must have collision detection enabled.
+        ///     </para>
+        ///     <para>
+        ///         Processing collision detection sprites take more a bit more CPU
+        ///         time compared to non-colliding sprites, <br/>
+        ///         so by default it is disabled on all sprites.
+        ///     </para>
+        /// </remarks>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="enable">Set to true to enable, false to disable.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_EnableSpriteCollision(int nsprite, bool enable);
 
+        /// <summary>
+        /// Gets the collision status of a given sprite.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <returns>true if this sprite is involved in a collision with another sprite.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_GetSpriteCollision(int nsprite);
 
+        /// <summary>
+        /// Retrieves runtime info about a given sprite.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="state">
+        /// Pointer to a user-allocated TLN_SpriteState structure to fill with requested data
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_GetSpriteState(int nsprite, TLN_SpriteState state);
+        public static extern bool TLN_GetSpriteState(int nsprite, out TLN_SpriteState state);
 
+        /// <summary>
+        /// Sets the first sprite drawn (beginning of list)
+        /// </summary>
+        /// <param name="nsprite">
+        /// Index of the sprite [0, num_sprites - 1]. Must be enabled (visible)
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetFirstSprite(int nsprite);
 
+        /// <summary>
+        /// Sets the next sprite to draw after a given sprite, builds list.
+        /// </summary>
+        /// <param name="nsprite">
+        /// Index of the sprite [0, num_sprites - 1]. Must be enabled (visible)
+        /// </param>
+        /// <param name="next">
+        /// Index of the sprite to draw after Id [0, num_sprites - 1]. Must be enabled (visible)
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetNextSprite(int nsprite, int next);
 
+        /// <summary>
+        /// <b>Deprecated, use <see cref="TLN_EnableSpriteFlag"/> instead.</b>
+        /// Enables or disables masking for this sprite, if enabled it won't be
+        /// drawn inside the region set up with TLN_SetSpritesMaskRegion()
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="enable">Set to true to enable, false to disable.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_EnableSpriteMasking(int nsprite, bool enable);
 
+        /// <summary>
+        /// Defines a sprite masking region between the two scanlines. <br/>
+        /// Sprites masked with TLN_EnableSpriteMasking() won't be drawn inside this region.
+        /// </summary>
+        /// <param name="top_line">Top scanline where masking starts.</param>
+        /// <param name="bottom_line">Bottom scanline where masking ends.</param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void TLN_SetSpritesMaskRegion(int top_line, int bottom_line);
 
+        /// <summary>
+        /// Starts a sprite animation.
+        /// </summary>
+        /// <param name="nsprite">If of the sprite to animate.</param>
+        /// <param name="sequence">Reference of the sequence to assign.</param>
+        /// <param name="loop">Amount of times to loop, 0 = infinite.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpriteAnimation(int nsprite, IntPtr sequence, int loop);
 
+        /// <summary>
+        /// Disables animation for the given sprite.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DisableSpriteAnimation(int nsprite);
 
+        /// <summary>
+        /// Disables the sprite so it is not drawn.
+        /// </summary>
+        /// <remarks>
+        /// A sprite is also automatically disabled when assigned with an
+        /// invalid spriteset or palette. <br/>Disabled sprites are returned by the
+        /// function TLN_GetAvailableSprite as available.
+        /// </remarks>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DisableSprite(int nsprite);
 
+        /// <summary>
+        /// Gets the palette assigned to a given sprite.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite to query [0, num_sprites - 1]</param>
+        /// <returns>
+        /// Reference to the palette, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetSpritePalette(int nsprite);
 
@@ -2615,22 +2819,81 @@ namespace Tilengine
 
         #region Sequence
 
+        /// <summary>
+        /// Creates a new sequence for the animation engine.
+        /// </summary>
+        /// <param name="name">String with an unique name to query later.</param>
+        /// <param name="target">For tileset animations, the tile index to animate.</param>
+        /// <param name="num_frames">Number of frames</param>
+        /// <param name="frames">Array of TLN_Frame items with indexes and delays.</param>
+        /// <returns>
+        /// Reference to the created sequence, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr TLN_CreateSequence(string name, int target, int num_frames, TLN_SequenceFrame frames);
+        public static extern IntPtr TLN_CreateSequence(string name, int target, int num_frames, in TLN_SequenceFrame[] frames);
 
+        /// <summary>
+        /// Creates a color cycle sequence for palette animation.
+        /// </summary>
+        /// <remarks>
+        /// Use this function to create advanced palette animation effects.
+        /// </remarks>
+        /// <param name="name">String with an unique name to query later.</param>
+        /// <param name="num_strips">Number of color strips.</param>
+        /// <param name="strips">Array of color strips to assign.</param>
+        /// <returns>
+        /// Reference to the created cycle, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr TLN_CreateCycle(string name, int numStrips, TLN_ColorStrip strips);
+        public static extern IntPtr TLN_CreateCycle(string name, int num_strips, in TLN_ColorStrip[] strips);
 
+        /// <summary>
+        /// Creates a name based sprite sequence.
+        /// </summary>
+        /// <remarks>
+        /// Trailing numbers in sprite names must start with 1 and be correlative. <br/>
+        /// (eg basename1... basename14)
+        /// </remarks>
+        /// <param name="name">Optional name used to retrieve it when adding to a TLN_SequencePack, can be NULL.</param>
+        /// <param name="spriteSet">Reference to the spriteset with frames to animate.</param>
+        /// <param name="basename">Base of the sprite name for the numbered sequence.</param>
+        /// <param name="delay">Number of ticks to delay between frame.</param>
+        /// <returns>
+        /// Reference to the created sprite sequence, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr TLN_CreateSpriteSequence(string name, IntPtr spriteSet, string basename, int delay);
+        public static extern IntPtr TLN_CreateSpriteSequence(string? name, IntPtr spriteSet, string basename, int delay);
 
+        /// <summary>
+        /// Creates a copy of the specified sequence.
+        /// </summary>
+        /// <param name="src">Sequence to copy.</param>
+        /// <returns>
+        /// Reference to the copied sprite sequence, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CloneSequence(IntPtr src);
 
+        /// <summary>
+        /// Gets runtime info about a given sequence.
+        /// </summary>
+        /// <param name="sequence">Sequence to query.</param>
+        /// <param name="info">
+        /// Pointer to a user-provided TLN_SequenceInfo structure to hold the returned data.
+        /// </param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_GetSequenceInfo(IntPtr sequence, TLN_SequenceInfo info);
+        public static extern bool TLN_GetSequenceInfo(IntPtr sequence, out TLN_SequenceInfo info);
 
+        /// <summary>
+        /// Deletes the sequence and frees up resources.
+        /// </summary>
+        /// <remarks>
+        /// <b>Don't delete an active sequence.</b>
+        /// </remarks>
+        /// <param name="sequence">Reference to the sequence.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DeleteSequence(IntPtr sequence);
@@ -2639,25 +2902,79 @@ namespace Tilengine
 
         #region Sequence Pack
 
+        /// <summary>
+        /// Creates a new collection of sequences.
+        /// </summary>
+        /// <returns>
+        /// Reference to the created pack, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_CreateSequencePack();
 
+        /// <summary>
+        /// Loads a sqx file containing one or more sequences.
+        /// </summary>
+        /// <remarks>
+        /// A SQX file can contain many sequences. This function loads all of them
+        /// inside a single TLN_SequencePack(). Individual sequences can be later
+        /// queried with TLN_FindSequence()
+        /// </remarks>
+        /// <param name="filename">SQX filename with the sequences to load.</param>
+        /// <returns>
+        /// Reference to the copied sequence pack, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr TLN_LoadSequencePack(string filename);
 
+        /// <summary>
+        /// Returns the nth sequence inside a sequence pack.
+        /// </summary>
+        /// <param name="sp">Reference to the sequence pack containing the sequence to find.</param>
+        /// <param name="index">Sequence number to return [0, num_sequences - 1]</param>
+        /// <returns>
+        /// Reference to the sequence, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLN_GetSequence(IntPtr sp, int index);
 
+        /// <summary>
+        /// Finds a sequence inside a sequence pack.
+        /// </summary>
+        /// <param name="sp">Reference to the sequence pack containing the sequence to find.</param>
+        /// <param name="name">Name of the sequence to find.</param>
+        /// <returns>
+        /// Reference to the sequence with the specified name, or <see cref="IntPtr.Zero"/> if an error occurred.
+        /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr TLN_FindSequence(IntPtr sp, string name);
 
+        /// <summary>
+        /// Gets the number of sequences inside a sequence pack.
+        /// </summary>
+        /// <param name="sp">Reference to the sequence pack to query.</param>
+        /// <returns>Number of sequences</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetSequencePackCount(IntPtr sp);
 
+        /// <summary>
+        /// Adds a sequence to a sequence pack.
+        /// </summary>
+        /// <param name="sp">Reference to the sequence pack.</param>
+        /// <param name="sequence">Reference to the sequence to attach.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_AddSequenceToPack(IntPtr sp, IntPtr sequence);
 
+        /// <summary>
+        /// Deletes the specified sequence pack and frees up memory.
+        /// </summary>
+        /// <remarks>
+        /// <b>Don't delete a sequence pack that has sequences currently attached to animations.</b> <br/>
+        /// The attached sequences are also deleted, so they don't need to be deleted externally.
+        /// </remarks>
+        /// <param name="sp">Reference to the sequence pack to delete.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DeleteSequencePack(IntPtr sp);
@@ -2666,25 +2983,64 @@ namespace Tilengine
 
         #region Colorcycle animation
 
+        /// <summary>
+        /// Starts a palette animation.
+        /// </summary>
+        /// <param name="index">Index of the animation to set [0, num_animations - 1]</param>
+        /// <param name="palette">Reference of the palette to be animated.</param>
+        /// <param name="sequence">Reference of the sequence to assign.</param>
+        /// <param name="blend">true for smooth frame interpolation, false for classic, discrete mode.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetPaletteAnimation(int index, IntPtr palette, IntPtr sequence, bool blend);
 
+        /// <summary>
+        /// Sets the source palette of a color cycle animation.
+        /// </summary>
+        /// <remarks>
+        /// Use this function to change the palette assigned to a color cycle animation running. <br/>
+        /// This is useful to combine color cycling and palette interpolation at the same time.
+        /// </remarks>
+        /// <param name="index">Index of the animation to set [0, num_animations - 1]</param>
+        /// <param name="palette">Reference of the palette to assign.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetPaletteAnimationSource(int index, IntPtr palette);
 
+        /// <summary>
+        /// Gets the state of the animation for a given sprite.
+        /// </summary>
+        /// <param name="index">Index of the sprite to set [0, num_sprites - 1]</param>
+        /// <returns>true if animation is running, false if it's finished or inactive</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_GetAnimationState(int index);
 
+        /// <summary>
+        /// Sets animation delay for single frame of given sprite animation.
+        /// </summary>
+        /// <param name="index">Index of the sprite to set [0, num_sprites - 1]</param>
+        /// <param name="frame">Index of the animation frame to change delay in [0, num_sequence - 1]</param>
+        /// <param name="delay">Delay of the animation frame.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetAnimationDelay(int index, int frame, int delay);
 
+        /// <summary>
+        /// Finds an available (unused) animation.
+        /// </summary>
+        /// <returns>Index of the first unused animation (starting from 0) or -1 if none found.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int TLN_GetAvailableAnimation();
 
+        /// <summary>
+        /// Disables the color cycle animation so it stops playing.
+        /// </summary>
+        /// <param name="index">Index of the animation to set [0, num_animations - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DisablePaletteAnimation(int index);
@@ -2693,21 +3049,49 @@ namespace Tilengine
 
         #region World
 
+        /// <summary>
+        /// Loads and assigns complete TMX file.
+        /// </summary>
+        /// <param name="tmxfile">TMX file to load.</param>
+        /// <param name="first_layer">Starting layer number where place the loaded tmx.</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_LoadWorld(string tmxfile, int first_layer);
 
+        /// <summary>
+        /// Sets global world position, moving all layers in sync according to their parallax factor.
+        /// </summary>
+        /// <param name="x">Horizontal position in world space.</param>
+        /// <param name="y">Vertical position in world space.</param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void TLN_SetWorldPosition(int x, int y);
 
+        /// <summary>
+        /// Sets layer parallax factor to use in conjunction with <see cref="TLN_SetWorldPosition"/>
+        /// </summary>
+        /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
+        /// <param name="x">Horizontal parallax factor</param>
+        /// <param name="y">Vertical parallax factor</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetLayerParallaxFactor(int nlayer, float x, float y);
 
+        /// <summary>
+        /// Sets the sprite position in world space coordinates.
+        /// </summary>
+        /// <param name="nsprite">Index of the sprite [0, num_sprites - 1]</param>
+        /// <param name="x">Horizontal world position of pivot (0 = left margin)</param>
+        /// <param name="y">Vertical world position of pivot (0 = top margin)</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_SetSpriteWorldPosition(int nsprite, int x, int y);
 
+        /// <summary>
+        /// Releases world resources loaded with <see cref="TLN_LoadWorld"/>
+        /// </summary>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void TLN_ReleaseWorld();
 
