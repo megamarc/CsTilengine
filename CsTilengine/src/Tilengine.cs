@@ -2258,7 +2258,7 @@ namespace Tilengine
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetLayerAffineTransform(int nlayer, in TLN_Affine? affine);
+        public static extern bool TLN_SetLayerAffineTransform(int nlayer, in TLN_Affine affine);
 
         /// <summary>
         /// Sets affine transform matrix to enable rotating and scaling of this layer.
