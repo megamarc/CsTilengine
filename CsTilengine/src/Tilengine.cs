@@ -46,9 +46,42 @@ namespace Tilengine
 {
     public static class TLN
     {
-        #region CsTilengine Variables
+        #region CsTilengine
 
         private const string NativeLibName = "Tilengine";
+
+        /// <summary>
+        /// Retrieve a message about the last error that occurred.
+        /// </summary>
+        /// <returns>
+        /// Returns a message with information about the specific error that occurred,
+        /// or an empty string if there hasn't been an error message.
+        /// </returns>
+        public static string TLN_GetError()
+        {
+            var lastError = TLN_GetLastError();
+
+            // If there is no error, return an empty string.
+            if (lastError == TLN_Error.TLN_ERR_OK)
+            {
+                return string.Empty;
+            }
+
+            // Get the pointer to the error message.
+            var descriptionPointer = TLN_GetErrorString(lastError);
+
+            // Convert the pointer to a string.
+            var description = Marshal.PtrToStringAnsi(descriptionPointer);
+            if (string.IsNullOrEmpty(description))
+            {
+                description = "Unknown error.";
+            }
+
+            // Free the unmanaged memory.
+            Marshal.FreeHGlobal(descriptionPointer);
+
+            return description;
+        }
 
         #endregion
 
@@ -1057,11 +1090,11 @@ namespace Tilengine
         /// Sets a static bitmap as background.
         /// Unlike tilemaps or sprites, this bitmap cannot be moved and has no transparency.
         /// </summary>
-        /// <param name="bitmap">Reference to bitmap for the background. Set null to disable.</param>
+        /// <param name="bitmap">Reference to bitmap for the background. Set to <see cref="IntPtr.Zero"/> to disable.</param>
         /// <returns>true if successful or false if an invalid bitmap reference was supplied.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetBGBitmap(IntPtr? bitmap);
+        public static extern bool TLN_SetBGBitmap(IntPtr bitmap);
 
         /// <summary>
         /// Changes the palette for the background bitmap.
@@ -1197,19 +1230,20 @@ namespace Tilengine
         public static extern void TLN_SetLastError(TLN_Error error);
 
         /// <summary>
-        /// Returns the last error after an invalid operation.
+        /// Returns the last error code after an invalid operation.
         /// </summary>
-        /// <returns>The last error code.</returns>
+        /// <returns>An error code from <see cref="TLN_Error"/></returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern TLN_Error TLN_GetLastError();
 
         /// <summary>
-        /// Returns the string description of the specified error code.
+        /// Returns a <b>pointer</b> to the description of the specified error code. <br/>
+        /// Use <see cref="TLN_GetError"/> to get the string value of the last error that occured.
         /// </summary>
         /// <param name="error">Error code to get the description from.</param>
-        /// <returns>The description of the specified error code.</returns>
+        /// <returns>A pointer to a description of an error from <see cref="TLN_Error"/>.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern string TLN_GetErrorString(TLN_Error error);
+        public static extern IntPtr TLN_GetErrorString(TLN_Error error);
 
         #endregion
 
@@ -1603,7 +1637,7 @@ namespace Tilengine
         /// </param>
         /// <returns>Reference to the created tileset, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_CreateTileset(int numtiles, int width, int height, IntPtr palette, IntPtr? sp, TLN_TileAttribute[]? attributes);
+        public static extern IntPtr TLN_CreateTileset(int numtiles, int width, int height, IntPtr palette, IntPtr sp, TLN_TileAttribute[]? attributes);
 
         /// <summary>
         /// Creates a multiple image-based tileset.
@@ -1717,7 +1751,7 @@ namespace Tilengine
         /// <param name="tileset">Optional reference to associated tileset. Can be NULL.</param>
         /// <returns>Reference to the created tilemap, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_CreateTilemap(int rows, int cols, TLN_Tile[] tiles, uint bgcolor, IntPtr? tileset);
+        public static extern IntPtr TLN_CreateTilemap(int rows, int cols, TLN_Tile[] tiles, uint bgcolor, IntPtr tileset);
 
         /// <summary>
         /// Loads a tilemap layer from a Tiled .tmx file.
@@ -2146,7 +2180,7 @@ namespace Tilengine
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetLayer(int nlayer, IntPtr? tileset, IntPtr tilemap);
+        public static extern bool TLN_SetLayer(int nlayer, IntPtr tileset, IntPtr tilemap);
 
         /// <summary>
         /// Configures a tiled background layer with the specified tilemap.
@@ -2254,7 +2288,7 @@ namespace Tilengine
         ///     </para>
         /// </remarks>
         /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
-        /// <param name="affine">Pointer to an TLN_Affine matrix, or NULL to disable it</param>
+        /// <param name="affine">Pointer to a TLN_Affine matrix.</param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -2386,7 +2420,7 @@ namespace Tilengine
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetLayerObjects(int nlayer, IntPtr objects, IntPtr? tileset);
+        public static extern bool TLN_SetLayerObjects(int nlayer, IntPtr objects, IntPtr tileset);
 
         /// <summary>
         /// Sets full layer priority, appearing in front of sprites.
