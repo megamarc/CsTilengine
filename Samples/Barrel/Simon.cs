@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
 using static Tilengine.TLN;
 
 namespace Barrel
@@ -10,19 +9,24 @@ namespace Barrel
         private readonly IntPtr _sequencePack;
         private readonly IntPtr _spriteSet;
         private readonly IntPtr _walkSequence;
-        private Vector2 _previousVelocity;
-        private Vector2 _velocity;
-        private Vector2 _position;
-        private Vector2 _displayPosition;
-        private int _xworld;
-        private State _state;
         private Direction _direction;
+        private Vector2 _position;
+        private Vector2 _previousVelocity;
+        private State _state;
+        private Vector2 _velocity;
+        private int _xworld;
 
-        private enum State
+        public Simon()
         {
-            Idle,
-            Walking,
-            Airborne
+            // Load sprites and sequences.
+            _spriteSet = TLN_LoadSpriteset("Simon");
+            _sequencePack = TLN_LoadSequencePack("Simon.sqx");
+            _walkSequence = TLN_FindSequence(_sequencePack, "walk");
+
+            // Set initial state.
+            TLN_SetSpriteSet(0, _spriteSet);
+            _direction = Direction.Right;
+            SetState(State.Idle);
         }
 
         private enum Direction
@@ -32,39 +36,29 @@ namespace Barrel
             Right
         }
 
-        public Simon()
+        private enum State
         {
-            _spriteSet = TLN_LoadSpriteset("Simon");
-            _sequencePack = TLN_LoadSequencePack("Simon.sqx");
-            _walkSequence = TLN_FindSequence(_sequencePack, "walk");
-
-            TLN_SetSpriteSet(0, _spriteSet);
-            _direction = Direction.Right;
-            SetState(State.Idle);
+            Idle,
+            Walking,
+            Airborne
         }
 
-        private void SetState(State s)
+        /// <summary>
+        /// Disposes of the character's resources.
+        /// </summary>
+        public void Deinit()
         {
-            if (_state == s)
-                return;
+            TLN_DeleteSequencePack(_sequencePack);
+            TLN_DeleteSpriteset(_spriteSet);
+        }
 
-            _state = s;
-            switch (_state)
-            {
-                case State.Idle:
-                    TLN_DisableSpriteAnimation(0);
-                    TLN_SetSpritePicture(0, 0);
-                    break;
-
-                case State.Walking:
-                    TLN_SetSpriteAnimation(0, _walkSequence, 0);
-                    break;
-
-                case State.Airborne:
-                    TLN_DisableSpriteAnimation(0);
-                    TLN_SetSpritePicture(0, 7);
-                    break;
-            }
+        /// <summary>
+        /// Gets the scroll position of the world.
+        /// </summary>
+        /// <returns>The scroll position.</returns>
+        public int GetPositionX()
+        {
+            return _xworld;
         }
 
         /// <summary>
@@ -84,6 +78,7 @@ namespace Barrel
             _previousVelocity = _velocity;
             _velocity.X = 0;
 
+            // Handle input.
             if (TLN_GetInput(TLN_Input.INPUT_LEFT))
             {
                 _velocity.X = -MoveSpeed;
@@ -107,8 +102,10 @@ namespace Barrel
                 _direction = Direction.Right;
             }
 
+            // Update the character's position.
             if (IsGrounded())
             {
+                // Set the character to walking state if he is moving.
                 _velocity.Y = 0;
 
                 if (TLN_GetInput(TLN_Input.INPUT_BUTTON1))
@@ -126,6 +123,7 @@ namespace Barrel
             }
             else
             {
+                // Set the character to airborne state if he is falling.
                 _velocity.Y += (MoveSpeed * 2) * deltaTime;
 
                 if (_state != State.Airborne)
@@ -135,14 +133,36 @@ namespace Barrel
             }
 
             _position += (_velocity + _previousVelocity) * deltaTime;
-            TLN_SetSpritePosition(0, (int)_position.X, (int)_position.Y);
+
+            // Make sure the character doesn't go off the screen.
+            if (_position.X < 0)
+            {
+                _position.X = 0;
+                _velocity.X = 0;
+            }
+
+            // Follow the character by setting the horizontal scroll position
+            // after a certain threshold.
+            if (_position.X <= 120)
+            {
+                TLN_SetSpritePosition(0, (int)_position.X, (int)_position.Y);
+            }
+            else
+            {
+                TLN_SetSpritePosition(0, 120, (int)_position.Y);
+                _xworld = (int)_position.X - 120;
+            }
         }
 
+        /// <summary>
+        /// Returns true if the character is on the ground.
+        /// </summary>
+        /// <returns>true if grounded, otherwise false.</returns>
         private bool IsGrounded()
         {
             for (var c = 8; c < 24; c += 8)
             {
-                TLN_GetLayerTile(0, (int)_position.X + c + _xworld, (int)_position.Y + 48, out var ti);
+                TLN_GetLayerTile(0, (int)_position.X + c, (int)_position.Y + 48, out var ti);
                 if (ti.index > 0)
                 {
                     return true;
@@ -152,15 +172,34 @@ namespace Barrel
             return false;
         }
 
-        public int GetPositionX()
+        /// <summary>
+        /// Updates the character's sprite and animation.
+        /// </summary>
+        /// <param name="state">The state to change.</param>
+        private void SetState(State state)
         {
-            return _xworld;
-        }
+            if (_state == state)
+            {
+                return;
+            }
 
-        public void Deinit()
-        {
-            TLN_DeleteSequencePack(_sequencePack);
-            TLN_DeleteSpriteset(_spriteSet);
+            _state = state;
+            switch (_state)
+            {
+                case State.Idle:
+                    TLN_DisableSpriteAnimation(0);
+                    TLN_SetSpritePicture(0, 0);
+                    break;
+
+                case State.Walking:
+                    TLN_SetSpriteAnimation(0, _walkSequence, 0);
+                    break;
+
+                case State.Airborne:
+                    TLN_DisableSpriteAnimation(0);
+                    TLN_SetSpritePicture(0, 7);
+                    break;
+            }
         }
     }
 }

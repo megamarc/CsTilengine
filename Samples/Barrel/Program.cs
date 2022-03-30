@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using static SDL2.SDL;
 using static Tilengine.TLN;
 
 namespace Barrel
@@ -15,7 +15,7 @@ namespace Barrel
         private static int _xpos;
         private static int _ypos;
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             // Setup engine
             TLN_Init(Width, Height, 2, 1, 1);
@@ -38,6 +38,7 @@ namespace Barrel
                 TLN_SubPaletteColor(Palettes[c], inc, inc, inc, 1, 255);
             }
 
+            // Setup affine transform
             _transform = new TLN_Affine
             {
                 dx = Width / 2f,
@@ -46,15 +47,16 @@ namespace Barrel
             };
 
             var simon = new Simon();
+            ulong lastTime = SDL_GetPerformanceCounter();
+            TLN_CreateWindow(null, TLN_CreateWindowFlags.CWF_VSYNC);
 
-            TLN_CreateWindow(null, TLN_CreateWindowFlags.CWF_S3);
-
-            long lastTime = 0;
-            var stopwatch = Stopwatch.StartNew();
+            // Main loop
             while (TLN_ProcessWindow())
             {
-                var now = stopwatch.Elapsed.Ticks;
-                var deltaTime = (now - lastTime) / 10000000f;
+                // Update time
+                SDL_Delay(1);
+                var now = SDL_GetPerformanceCounter();
+                var deltaTime = (float)((now - lastTime) / (float)SDL_GetPerformanceFrequency());
                 lastTime = now;
 
                 // Input
@@ -84,6 +86,10 @@ namespace Barrel
             return fx0 + (fx1 - fx0) * (x - x0) / (x1 - x0);
         }
 
+        /// <summary>
+        /// Raster callback
+        /// </summary>
+        /// <param name="line">Current scanline</param>
         private static void RasterCallback(int line)
         {
             var angle = Lerp(line, 0, Height - 1, 0, MathF.PI);
