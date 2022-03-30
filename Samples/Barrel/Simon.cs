@@ -5,7 +5,7 @@ namespace Barrel
 {
     internal class Simon
     {
-        private const float MoveSpeed = 50f;
+        private const float MoveSpeed = 45f;
         private readonly IntPtr _sequencePack;
         private readonly IntPtr _spriteSet;
         private readonly IntPtr _walkSequence;

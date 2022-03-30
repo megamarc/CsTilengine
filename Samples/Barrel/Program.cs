@@ -7,9 +7,9 @@ namespace Barrel
     {
         private const int BackgroundLayer = 1;
         private const int ForegroundLayer = 0;
-        private const int Height = 240;
         private const int MaxPalette = 8;
         private const int Width = 400;
+        private const int Height = 240;
         private static readonly IntPtr[] Palettes = new IntPtr[MaxPalette];
         private static TLN_Affine _transform;
         private static int _xpos;
@@ -23,7 +23,7 @@ namespace Barrel
             TLN_SetBGColor(115, 48, 57);
 
             // Load resources
-            TLN_SetLoadPath("assets/sc4");
+            TLN_SetLoadPath("assets");
             var foreground = TLN_LoadTilemap("castle_fg.tmx", null);
             var background = TLN_LoadTilemap("castle_bg.tmx", null);
             TLN_SetLayerTilemap(ForegroundLayer, foreground);
@@ -47,14 +47,15 @@ namespace Barrel
             };
 
             var simon = new Simon();
-            ulong lastTime = SDL_GetPerformanceCounter();
+            var lastTime = SDL_GetPerformanceCounter();
             TLN_CreateWindow(null, TLN_CreateWindowFlags.CWF_VSYNC);
+            TLN_SetWindowTitle("Barrel demo");
 
             // Main loop
             while (TLN_ProcessWindow())
             {
                 // Update time
-                SDL_Delay(1);
+                SDL_Delay(8);
                 var now = SDL_GetPerformanceCounter();
                 var deltaTime = (float)((now - lastTime) / (float)SDL_GetPerformanceFrequency());
                 lastTime = now;
