@@ -8,8 +8,8 @@ namespace TestMouse
         private const int Width = 400;
         private const int Height = 240;
         private const int MaxEntities = 20;
-        private static Entity[] _entities = new Entity[MaxEntities];
-        private static Entity _selectedEntity;
+        private static readonly Entity[] _entities = new Entity[MaxEntities];
+        private static Entity? _selectedEntity;
         private static IntPtr _paletteSelect;
         private static IntPtr _paletteDefault;
 

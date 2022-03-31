@@ -13,15 +13,15 @@ namespace Shadow
 
         private static readonly RGB[] SkyColors =
         {
-            new RGB(0x1D, 0x44, 0x7B),
-            new RGB(0x7F, 0xA4, 0xD9),
-            new RGB(0x0B, 0x00, 0x4E),
-            new RGB(0xEB, 0x99, 0x9D),
+            new (0x1D, 0x44, 0x7B),
+            new (0x7F, 0xA4, 0xD9),
+            new (0x0B, 0x00, 0x4E),
+            new (0xEB, 0x99, 0x9D),
         };
 
         private static RGB _skyHigh;
         private static RGB _skyLow;
-        private static int _xpos = 0;
+        private static int _xpos;
 
         public static void Main(string[] args)
         {

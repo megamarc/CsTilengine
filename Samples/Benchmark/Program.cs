@@ -60,8 +60,8 @@ namespace Benchmark
             var spriteset = TLN_LoadSpriteset("FireLeo");
             for (var c = 0; c < AmountOfSprites; c++)
             {
-                int y = c / 25;
-                int x = c % 25;
+                var y = c / 25;
+                var x = c % 25;
                 TLN_ConfigSprite(c, spriteset, TLN_TileFlags.FLAG_NONE);
                 TLN_SetSpritePicture(c, 0);
                 TLN_SetSpritePosition(c, x * 15, y * 21);
