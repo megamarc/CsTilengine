@@ -2,10 +2,10 @@
 # CsTilengine
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ## About CsTilengine
-CsTilengine is the C#/NET/Mono binding for Tilengine. It is not a direct 1:1 API translation of the original C library, but it uses familiar C# constructions as classes, arrays, etc.
+CsTilengine is the C#/NET/Mono binding for Tilengine. This fork of [CsTilengine](https://github.com/megamarc/CsTilengine) is a 1:1 API translation of the original C library. 
 
 ## Contents
-* */src* directory contains the single `tilengine.cs` module with the binding itself
+* */CsTilengine/src* directory contains the single `Tilengine.cs` module with the binding itself
 * */samples* directory contains various examples ready to run and test
 
 ## Prerequisites
@@ -35,23 +35,22 @@ The following program does these actions:
 
 Source code:
 ```csharp
-using Tilengine;
+using static Tilengine.TLN;
 
-class test{
-	static int Main(string[] args){
-		int frame = 0;
+pubilc class Test
+{
+	public static void Main(string[] args)
+	{
+		TLN_Init(400, 240, 2, 1, 1);
+		TLN_SetLoadPath("assets/sonic");
+		var foreground = TLN_LoadTilemap("Sonic_md_fg1.tmx", null);
+		TLN_SetLayerTilemap(0, foreground);
 
-		Engine engine = Engine.Init(400, 240, 1, 0, 20);
-		engine.LoadPath = "assets/sonic";
-		Tilemap foreground = Tilemap.FromFile("Sonic_md_fg1.tmx", null);
-		engine.Layers[0].SetMap(foreground);
-
-		Window window = Window.Create(null, WindowFlags.Vsync);
-		while (window.Process ()){
-			window.DrawFrame(frame);
-			frame += 1;
+		TLN_CreateWindow(null, TLN_CreateWindowFlags.CWF_VSYNC);
+		while (TLN_ProcessWindow())
+		{
+			TLN_DrawFrame(0);
 		}
-		return 0;
 	}
 }
 ```
@@ -61,15 +60,8 @@ Resulting output:
 ![Test](test.png)
 
 ## Running the samples (Windows)
-There's a `samples.sln` Visual Studio solution file. Open it, build solution and you'll get two executables ready to run.
-
-## Running the samples (Linux/OSX)
-Open a terminal window inside the "samples" directory and the following commands:
-```
-make all
-./test
-./platformer
-```
+There's a `CsTilengine.sln` Visual Studio solution file. Open it, navigate to the *Samples* folder.
+Build a project and you'll get one executable ready to run.
 
 ## License
 CsTilengine is released under the permissive MIT license
