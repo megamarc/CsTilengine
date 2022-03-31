@@ -1816,7 +1816,7 @@ namespace Tilengine
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetTilemapTile(IntPtr tilemap, int row, int col, TLN_Tile? tile);
+        public static extern bool TLN_SetTilemapTile(IntPtr tilemap, int row, int col, in TLN_Tile tile);
 
         /// <summary>
         /// Copies blocks of tiles between two tilemaps.
@@ -2511,7 +2511,7 @@ namespace Tilengine
         public static extern IntPtr TLN_GetLayerBitmap(int nlayer);
 
         /// <summary>
-        /// Returns the active bitmap on a <see cref="TLN_LayerType.LAYER_OBJECT"/> layer type.
+        /// Returns the active object list on a <see cref="TLN_LayerType.LAYER_OBJECT"/> layer type.
         /// </summary>
         /// <param name="nlayer">Layer index [0, num_layers - 1]</param>
         /// <returns>Reference to the active objects list, or <see cref="IntPtr.Zero"/> if an error occurred.</returns>
