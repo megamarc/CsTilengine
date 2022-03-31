@@ -37,7 +37,7 @@ Source code:
 ```csharp
 using static Tilengine.TLN;
 
-pubilc class Test
+public class Test
 {
 	public static void Main(string[] args)
 	{
