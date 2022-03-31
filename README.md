@@ -39,19 +39,19 @@ using static Tilengine.TLN;
 
 public class Test
 {
-	public static void Main(string[] args)
-	{
-		TLN_Init(400, 240, 2, 1, 1);
-		TLN_SetLoadPath("assets/sonic");
-		var foreground = TLN_LoadTilemap("Sonic_md_fg1.tmx", null);
-		TLN_SetLayerTilemap(0, foreground);
+    public static void Main(string[] args)
+    {
+        TLN_Init(400, 240, 2, 1, 1);
+        TLN_SetLoadPath("assets/sonic");
+        var foreground = TLN_LoadTilemap("Sonic_md_fg1.tmx", null);
+        TLN_SetLayerTilemap(0, foreground);
 
-		TLN_CreateWindow(null, TLN_CreateWindowFlags.CWF_VSYNC);
-		while (TLN_ProcessWindow())
-		{
-			TLN_DrawFrame(0);
-		}
-	}
+        TLN_CreateWindow(null, TLN_CreateWindowFlags.CWF_VSYNC);
+        while (TLN_ProcessWindow())
+        {
+            TLN_DrawFrame(0);
+        }
+    }
 }
 ```
 
