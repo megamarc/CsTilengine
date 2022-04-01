@@ -88,7 +88,7 @@ namespace Tilengine
         #region Structures
 
         /// <summary>
-        /// Affine transformation parameters
+        /// Affine transformation parameters.
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct TLN_Affine
@@ -120,7 +120,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Tile item for Tilemap access functions
+        /// Tile item for Tilemap access functions.
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct TLN_Tile
@@ -620,42 +620,42 @@ namespace Tilengine
             /// <summary>
             /// Create a fullscreen window.
             /// </summary>
-            CWF_FULLSCREEN = (1 << 0),
+            CWF_FULLSCREEN = 1 << 0,
 
             /// <summary>
             /// Sync frame updates with vertical retrace.
             /// </summary>
-            CWF_VSYNC = (1 << 1),
+            CWF_VSYNC = 1 << 1,
 
             /// <summary>
             /// Create a window of the same size as the frame buffer.
             /// </summary>
-            CWF_S1 = (1 << 2),
+            CWF_S1 = 1 << 2,
 
             /// <summary>
             /// Create a window 2x the size of the frame buffer.
             /// </summary>
-            CWF_S2 = (2 << 2),
+            CWF_S2 = 2 << 2,
 
             /// <summary>
             /// Create a window 3x the size of the frame buffer.
             /// </summary>
-            CWF_S3 = (3 << 2),
+            CWF_S3 = 3 << 2,
 
             /// <summary>
             /// Create a window 4x the size of the frame buffer.
             /// </summary>
-            CWF_S4 = (4 << 2),
+            CWF_S4 = 4 << 2,
 
             /// <summary>
             /// Create a window 5x the size of the frame buffer.
             /// </summary>
-            CWF_S5 = (5 << 2),
+            CWF_S5 = 5 << 2,
 
             /// <summary>
             /// Unfiltered scaling
             /// </summary>
-            CWF_NEAREST = (1 << 6),
+            CWF_NEAREST = 1 << 6,
         }
 
         public enum TLN_Error
@@ -782,7 +782,7 @@ namespace Tilengine
 
         public delegate byte TLN_BlendFunction(byte src, byte dst);
 
-        public delegate void TLN_SDLCallback(in SDL.SDL_Event sdlEvent);
+        public delegate void TLN_SDLCallback(in SDL.SDL_Event sdl_event);
 
         #endregion
 
@@ -1119,17 +1119,17 @@ namespace Tilengine
         ///         the use of raster effects.
         ///     </para>
         /// </remarks>
-        /// <param name="videoCallback">Address of the function to call.</param>
+        /// <param name="video_callback">Address of the function to call.</param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void TLN_SetRasterCallback(TLN_VideoCallback videoCallback);
+        public static extern void TLN_SetRasterCallback(TLN_VideoCallback video_callback);
 
         /// <summary>
         /// Specifies the address of the function to call for each drawn frame.
         /// </summary>
-        /// <param name="videoCallback">Address of the function to call.</param>
+        /// <param name="video_callback">Address of the function to call.</param>
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void TLN_SetFrameCallback(TLN_VideoCallback videoCallback);
+        public static extern void TLN_SetFrameCallback(TLN_VideoCallback video_callback);
 
         /// <summary>
         /// Sets the output surface for rendering.
@@ -1167,7 +1167,7 @@ namespace Tilengine
         /// <summary>
         /// Sets custom blend function to use when BLEND_CUSTOM mode is selected.
         /// </summary>
-        /// <param name="blendFunction">
+        /// <param name="blend_function">
         ///     <para>
         ///         A delegate to a user-provided function that takes two parameters: <br/>
         ///         The source component intensity. <br/>
@@ -1179,14 +1179,14 @@ namespace Tilengine
         ///     </para>
         /// </param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void TLN_SetCustomBlendFunction(TLN_BlendFunction blendFunction);
+        public static extern void TLN_SetCustomBlendFunction(TLN_BlendFunction blend_function);
 
         /// <summary>
         /// Sets the logging level for the current Tilengine instance.
         /// </summary>
-        /// <param name="logLevel">Member of the <see cref="TLN_LogLevel"/> enumeration.</param>
+        /// <param name="log_level">Member of the <see cref="TLN_LogLevel"/> enumeration.</param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void TLN_SetLogLevel(TLN_LogLevel logLevel);
+        public static extern void TLN_SetLogLevel(TLN_LogLevel log_level);
 
         /// <summary>
         /// Open the resource package with optional AES-128 key and binds it.
@@ -1385,9 +1385,9 @@ namespace Tilengine
         /// </summary>
         /// <param name="player">Player number to configure (PLAYER1 - PLAYER4)</param>
         /// <param name="input">Input to associate to the given button</param>
-        /// <param name="joyButton">Button index</param>
+        /// <param name="joy_button">Button index</param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void TLN_DefineInputButton(TLN_Player player, TLN_Input input, byte joyButton);
+        public static extern void TLN_DefineInputButton(TLN_Player player, TLN_Input input, byte joy_button);
 
         /// <summary>
         /// Draws a frame to the window
@@ -1448,7 +1448,7 @@ namespace Tilengine
         /// One of the enumerated <see cref="TLN_Overlay"/> types. <br/>
         /// Choosing TLN_OVERLAY_CUSTOM selects the image passed when calling TLN_CreateWindow.
         /// </param>
-        /// <param name="overlayFactor">
+        /// <param name="overlay_factor">
         /// Blend factor for the overlay image. <br/>
         /// 0 is full transparent (no effect), 255 is full blending.
         /// </param>
@@ -1460,12 +1460,12 @@ namespace Tilengine
         /// <param name="v2">Output brightness for input brightness = threshold</param>
         /// <param name="v3">Output brightness for input brightness = 255</param>
         /// <param name="blur">Adds gaussian blur to brightness overlay, softens image.</param>
-        /// <param name="glowFactor">
+        /// <param name="glow_factor">
         /// blend addition factor for brightness overlay.
         /// 0 is not addition, 255 is full addition
         /// </param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void TLN_EnableCRTEffect(TLN_Overlay overlay, byte overlayFactor, byte threshold, byte v0, byte v1, byte v2, byte v3, bool blur, byte glowFactor);
+        public static extern void TLN_EnableCRTEffect(TLN_Overlay overlay, byte overlay_factor, byte threshold, byte v0, byte v1, byte v2, byte v3, bool blur, byte glow_factor);
 
         /// <summary>
         /// Disables the CRT post-processing effect.
@@ -1517,12 +1517,12 @@ namespace Tilengine
         /// </summary>
         /// <param name="bitmap">Bitmap reference containing the sprite graphics.</param>
         /// <param name="data">Array of TLN_SpriteData structures with sprite descriptions.</param>
-        /// <param name="numEntries">Number of entries in the TLN_SpriteData array.</param>
+        /// <param name="num_entries">Number of entries in the TLN_SpriteData array.</param>
         /// <returns>
         /// Reference to the created spriteset, or <see cref="IntPtr.Zero"/> if an error occurred.
         /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_CreateSpriteset(IntPtr bitmap, TLN_SpriteData[] data, int numEntries);
+        public static extern IntPtr TLN_CreateSpriteset(IntPtr bitmap, TLN_SpriteData[] data, int num_entries);
 
         /// <summary>
         /// Loads a spriteset from an image png and its associated atlas descriptor.
@@ -2800,10 +2800,10 @@ namespace Tilengine
         /// Defines a sprite masking region between the two scanlines. <br/>
         /// Sprites masked with TLN_EnableSpriteMasking() won't be drawn inside this region.
         /// </summary>
-        /// <param name="topLine">Top scanline where masking starts.</param>
-        /// <param name="bottomLine">Bottom scanline where masking ends.</param>
+        /// <param name="top_line">Top scanline where masking starts.</param>
+        /// <param name="bottom_line">Bottom scanline where masking ends.</param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void TLN_SetSpritesMaskRegion(int topLine, int bottomLine);
+        public static extern void TLN_SetSpritesMaskRegion(int top_line, int bottom_line);
 
         /// <summary>
         /// Starts a sprite animation.
@@ -2858,13 +2858,13 @@ namespace Tilengine
         /// </summary>
         /// <param name="name">String with an unique name to query later.</param>
         /// <param name="target">For tileset animations, the tile index to animate.</param>
-        /// <param name="numFrames">Number of frames</param>
+        /// <param name="num_frames">Number of frames</param>
         /// <param name="frames">Array of TLN_Frame items with indexes and delays.</param>
         /// <returns>
         /// Reference to the created sequence, or <see cref="IntPtr.Zero"/> if an error occurred.
         /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr TLN_CreateSequence(string name, int target, int numFrames, in TLN_SequenceFrame[] frames);
+        public static extern IntPtr TLN_CreateSequence(string name, int target, int num_frames, in TLN_SequenceFrame[] frames);
 
         /// <summary>
         /// Creates a color cycle sequence for palette animation.
@@ -2873,13 +2873,13 @@ namespace Tilengine
         /// Use this function to create advanced palette animation effects.
         /// </remarks>
         /// <param name="name">String with an unique name to query later.</param>
-        /// <param name="numStrips">Number of color strips.</param>
+        /// <param name="num_strips">Number of color strips.</param>
         /// <param name="strips">Array of color strips to assign.</param>
         /// <returns>
         /// Reference to the created cycle, or <see cref="IntPtr.Zero"/> if an error occurred.
         /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr TLN_CreateCycle(string name, int numStrips, in TLN_ColorStrip[] strips);
+        public static extern IntPtr TLN_CreateCycle(string name, int num_strips, in TLN_ColorStrip[] strips);
 
         /// <summary>
         /// Creates a name based sprite sequence.
@@ -2889,14 +2889,14 @@ namespace Tilengine
         /// (eg basename1... basename14)
         /// </remarks>
         /// <param name="name">Optional name used to retrieve it when adding to a TLN_SequencePack, can be NULL.</param>
-        /// <param name="spriteSet">Reference to the spriteset with frames to animate.</param>
+        /// <param name="sprite_set">Reference to the spriteset with frames to animate.</param>
         /// <param name="basename">Base of the sprite name for the numbered sequence.</param>
         /// <param name="delay">Number of ticks to delay between frame.</param>
         /// <returns>
         /// Reference to the created sprite sequence, or <see cref="IntPtr.Zero"/> if an error occurred.
         /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr TLN_CreateSpriteSequence(string? name, IntPtr spriteSet, string basename, int delay);
+        public static extern IntPtr TLN_CreateSpriteSequence(string? name, IntPtr sprite_set, string basename, int delay);
 
         /// <summary>
         /// Creates a copy of the specified sequence.
@@ -3087,11 +3087,11 @@ namespace Tilengine
         /// Loads and assigns complete TMX file.
         /// </summary>
         /// <param name="tmxfile">TMX file to load.</param>
-        /// <param name="firstLayer">Starting layer number where place the loaded tmx.</param>
+        /// <param name="first_layer">Starting layer number where place the loaded tmx.</param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_LoadWorld(string tmxfile, int firstLayer);
+        public static extern bool TLN_LoadWorld(string tmxfile, int first_layer);
 
         /// <summary>
         /// Sets global world position, moving all layers in sync according to their parallax factor.
