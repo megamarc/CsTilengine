@@ -346,7 +346,7 @@ namespace Tilengine
             /// <summary>
             /// Object type
             /// </summary>
-            public uint type;
+            public byte type;
 
             /// <summary>
             /// Object is visible
@@ -961,7 +961,7 @@ namespace Tilengine
         /// <summary>
         /// Deletes explicit context.
         /// </summary>
-        /// <param name="context">Context reference to delete.</param>
+        /// <param name="context">Reference to the context.</param>
         /// <returns>true if successful or false if an invalid context is supplied.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1517,12 +1517,12 @@ namespace Tilengine
         /// </summary>
         /// <param name="bitmap">Bitmap reference containing the sprite graphics.</param>
         /// <param name="data">Array of TLN_SpriteData structures with sprite descriptions.</param>
-        /// <param name="num_entries">Number of entries in the TLN_SpriteData array.</param>
+        /// <param name="numEntries">Number of entries in the TLN_SpriteData array.</param>
         /// <returns>
         /// Reference to the created spriteset, or <see cref="IntPtr.Zero"/> if an error occurred.
         /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr TLN_CreateSpriteset(IntPtr bitmap, TLN_SpriteData[] data, int num_entries);
+        public static extern IntPtr TLN_CreateSpriteset(IntPtr bitmap, TLN_SpriteData[] data, int numEntries);
 
         /// <summary>
         /// Loads a spriteset from an image png and its associated atlas descriptor.
@@ -1609,13 +1609,13 @@ namespace Tilengine
         /// Deletes the specified spriteset and frees up memory.
         /// </summary>
         /// <remarks>
-        /// <b>Don't delete a spriteset which is attached by a sprite.</b>
+        /// <b>Don't delete a spriteset which is attached to a sprite.</b>
         /// </remarks>
-        /// <param name="Spriteset">Spriteset to delete.</param>
+        /// <param name="Spriteset">Reference to the spriteset.</param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_DeleteSpriteset(IntPtr Spriteset);
+        public static extern bool TLN_DeleteSpriteset(IntPtr spriteset);
 
         #endregion
 
@@ -1731,7 +1731,7 @@ namespace Tilengine
         /// <remarks>
         /// <b>Don't delete a tileset which is attached to a layer.</b>
         /// </remarks>
-        /// <param name="tileset">Tileset to delete</param>
+        /// <param name="tileset">Reference to the tileset.</param>
         /// <returns></returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1843,7 +1843,7 @@ namespace Tilengine
         /// <remarks>
         /// <b>Don't delete a tilemap which is attached to a layer.</b>
         /// </remarks>
-        /// <param name="tilemap">Reference to the tilemap to delete.</param>
+        /// <param name="tilemap">Reference to the tilemap.</param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1978,7 +1978,7 @@ namespace Tilengine
         /// <remarks>
         /// <b>Don't delete a palette which is attached to a layer or sprite.</b>
         /// </remarks>
-        /// <param name="palette">Reference to the palette to delete.</param>
+        /// <param name="palette">Reference to the palette.</param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -2153,7 +2153,7 @@ namespace Tilengine
         /// <summary>
         /// Deletes object list.
         /// </summary>
-        /// <param name="list">Reference to list to delete.</param>
+        /// <param name="list">Reference to the object list.</param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -2800,10 +2800,10 @@ namespace Tilengine
         /// Defines a sprite masking region between the two scanlines. <br/>
         /// Sprites masked with TLN_EnableSpriteMasking() won't be drawn inside this region.
         /// </summary>
-        /// <param name="top_line">Top scanline where masking starts.</param>
-        /// <param name="bottom_line">Bottom scanline where masking ends.</param>
+        /// <param name="topLine">Top scanline where masking starts.</param>
+        /// <param name="bottomLine">Bottom scanline where masking ends.</param>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void TLN_SetSpritesMaskRegion(int top_line, int bottom_line);
+        public static extern void TLN_SetSpritesMaskRegion(int topLine, int bottomLine);
 
         /// <summary>
         /// Starts a sprite animation.
@@ -2858,13 +2858,13 @@ namespace Tilengine
         /// </summary>
         /// <param name="name">String with an unique name to query later.</param>
         /// <param name="target">For tileset animations, the tile index to animate.</param>
-        /// <param name="num_frames">Number of frames</param>
+        /// <param name="numFrames">Number of frames</param>
         /// <param name="frames">Array of TLN_Frame items with indexes and delays.</param>
         /// <returns>
         /// Reference to the created sequence, or <see cref="IntPtr.Zero"/> if an error occurred.
         /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr TLN_CreateSequence(string name, int target, int num_frames, in TLN_SequenceFrame[] frames);
+        public static extern IntPtr TLN_CreateSequence(string name, int target, int numFrames, in TLN_SequenceFrame[] frames);
 
         /// <summary>
         /// Creates a color cycle sequence for palette animation.
@@ -2873,13 +2873,13 @@ namespace Tilengine
         /// Use this function to create advanced palette animation effects.
         /// </remarks>
         /// <param name="name">String with an unique name to query later.</param>
-        /// <param name="num_strips">Number of color strips.</param>
+        /// <param name="numStrips">Number of color strips.</param>
         /// <param name="strips">Array of color strips to assign.</param>
         /// <returns>
         /// Reference to the created cycle, or <see cref="IntPtr.Zero"/> if an error occurred.
         /// </returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr TLN_CreateCycle(string name, int num_strips, in TLN_ColorStrip[] strips);
+        public static extern IntPtr TLN_CreateCycle(string name, int numStrips, in TLN_ColorStrip[] strips);
 
         /// <summary>
         /// Creates a name based sprite sequence.
@@ -3007,7 +3007,7 @@ namespace Tilengine
         /// <b>Don't delete a sequence pack that has sequences currently attached to animations.</b> <br/>
         /// The attached sequences are also deleted, so they don't need to be deleted externally.
         /// </remarks>
-        /// <param name="sp">Reference to the sequence pack to delete.</param>
+        /// <param name="sp">Reference to the sequence pack.</param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -3087,11 +3087,11 @@ namespace Tilengine
         /// Loads and assigns complete TMX file.
         /// </summary>
         /// <param name="tmxfile">TMX file to load.</param>
-        /// <param name="first_layer">Starting layer number where place the loaded tmx.</param>
+        /// <param name="firstLayer">Starting layer number where place the loaded tmx.</param>
         /// <returns>true if successful or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_LoadWorld(string tmxfile, int first_layer);
+        public static extern bool TLN_LoadWorld(string tmxfile, int firstLayer);
 
         /// <summary>
         /// Sets global world position, moving all layers in sync according to their parallax factor.
