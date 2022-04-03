@@ -1,15 +1,16 @@
 ﻿/******************************************************************************
-*
-* Tilengine sample
-* 2022 Simon Vonhoff
-* 2015 Marc Palacios
-* http://www.tilengine.org
-*
-* This example show a classic Mode 7 perspective projection plane like the
-* one seen in SNES games like Super Mario Kart. It uses a single transformed
-* layer with a raster effect setting the scaling factor for each line
-*
-******************************************************************************/
+ * C# port for the Mode7.c sample
+ * 2022 Simon Vonhoff
+ *
+ * Tilengine sample
+ * 2015 Marc Palacios
+ * http://www.tilengine.org
+ *
+ * This example show a classic Mode 7 perspective projection plane like the
+ * one seen in SNES games like Super Mario Kart. It uses a single transformed
+ * layer with a raster effect setting the scaling factor for each line
+ *
+ ******************************************************************************/
 
 using System.Numerics;
 using static Tilengine.TLN;
@@ -180,7 +181,7 @@ namespace Mode7
                 var s1 = FloatToFixedBits(5.0f);
                 var s = Lerp(line, 24, Height, s0, s1);
                 var scale = FixedBitsToFloat((int)s);
-                TLN_SetLayerTransform(BackgroundLayer, _angle, Width / 2, Height, scale, scale);
+                TLN_SetLayerTransform(BackgroundLayer, _angle, Width / 2f, Height, scale, scale);
             }
         }
     }

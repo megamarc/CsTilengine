@@ -1,14 +1,15 @@
 ﻿/******************************************************************************
-*
-* Tilengine sample
-* 2022 Simon Vonhoff
-* 2015 Marc Palacios
-* http://www.tilengine.org
-*
-* This example show a barrel distortion effect similar to one of the stages
-* in the SNES game "Super Castlevania IV"
-*
-******************************************************************************/
+ * C# port for the Barrel.c sample
+ * 2022 Simon Vonhoff
+ *
+ * Tilengine sample
+ * 2015 Marc Palacios
+ * http://www.tilengine.org
+ *
+ * This example show a barrel distortion effect similar to one of the stages
+ * in the SNES game "Super Castlevania IV"
+ *
+ ******************************************************************************/
 
 using static SDL2.SDL;
 using static Tilengine.TLN;

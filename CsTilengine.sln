@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestMouse", "Samples\TestMo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scaling", "Samples\Scaling\Scaling.csproj", "{D12072A6-DD63-4FDD-BA2E-D199E76D8962}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Platformer", "Samples\Platformer\Platformer.csproj", "{540DA18F-8F7C-4590-AAE1-64374485D705}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{D12072A6-DD63-4FDD-BA2E-D199E76D8962}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D12072A6-DD63-4FDD-BA2E-D199E76D8962}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D12072A6-DD63-4FDD-BA2E-D199E76D8962}.Release|Any CPU.Build.0 = Release|Any CPU
+		{540DA18F-8F7C-4590-AAE1-64374485D705}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{540DA18F-8F7C-4590-AAE1-64374485D705}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{540DA18F-8F7C-4590-AAE1-64374485D705}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{540DA18F-8F7C-4590-AAE1-64374485D705}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +77,7 @@ Global
 		{CE729657-71A6-4144-9F72-BA8CFE71801F} = {89D86FEA-0AB4-48F5-93CE-6D0B113A2656}
 		{349044D4-B27C-4ADA-9E61-E5BE7C54C4E6} = {89D86FEA-0AB4-48F5-93CE-6D0B113A2656}
 		{D12072A6-DD63-4FDD-BA2E-D199E76D8962} = {89D86FEA-0AB4-48F5-93CE-6D0B113A2656}
+		{540DA18F-8F7C-4590-AAE1-64374485D705} = {89D86FEA-0AB4-48F5-93CE-6D0B113A2656}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {32DC305E-4409-484D-B4C7-6AF6BD20E898}
