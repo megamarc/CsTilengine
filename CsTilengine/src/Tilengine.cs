@@ -1,6 +1,6 @@
 ﻿#region License
 
-/* CsTilengine - 1:1 Api C# Wrapper for Tilengine v2.9.4
+/* CsTilengine - 1:1 Api C# Wrapper for Tilengine v2.9.5
  * Copyright (C) 2022 Simon Vonhoff <mailto:simon.vonhoff@outlook.com>
  *
  * Tilengine - The 2D retro graphics engine with raster effects
@@ -28,7 +28,7 @@
 
 /*
  *****************************************************************************
- * C# Tilengine wrapper - Up to date to library version 2.9.4
+ * C# Tilengine wrapper - Up to date to library version 2.9.5
  * http://www.tilengine.org
  *****************************************************************************
  */
@@ -2824,6 +2824,24 @@ namespace Tilengine
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         public static extern bool TLN_DisableSpriteAnimation(int nsprite);
+
+        /// <summary>
+        /// Pauses animation for the given sprite.
+        /// </summary>
+        /// <param name="index">Index of the sprite [0, num_sprites - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
+        [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_PauseSpriteAnimation(int index);
+
+        /// <summary>
+        /// Restores animation for the given sprite.
+        /// </summary>
+        /// <param name="index">Index of the sprite [0, num_sprites - 1]</param>
+        /// <returns>true if successful or false if an error occurred.</returns>
+        [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_ResumeSpriteAnimation(int index);
 
         /// <summary>
         /// Disables the sprite so it is not drawn.
