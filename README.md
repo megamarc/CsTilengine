@@ -2,7 +2,7 @@
 # CsTilengine
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ## About CsTilengine
-CsTilengine is a C#/NET/Mono binding for Tilengine. This fork of [CsTilengine](https://github.com/megamarc/CsTilengine) is a 1:1 API translation of the original C library. 
+CsTilengine is a C#/NET/Mono binding for Tilengine. This binding is a 1:1 API translation of the original C library. 
 
 ## Contents
 * */CsTilengine/src* directory contains the single `Tilengine.cs` module with the binding itself
@@ -21,7 +21,7 @@ sudo apt-get install mono-mcs
 ```
 
 ## Installation
-No install step is required. Just make sure that the Tilengine library and the `tilengine.cs` modules are accessible from within your own project
+No install step is required. Just make sure that the Tilengine library and the `Tilengine.cs` modules are accessible from within your own project
 
 ## Basic program
 The following program does these actions:
