@@ -6,7 +6,7 @@
  * 2015 Marc Palacios
  * http://www.tilengine.org
  *
- * This example show a classic Mode 7 perspective projection plane like the
+ * This example shows a classic Mode 7 perspective projection plane like the
  * one seen in SNES games like Super Mario Kart. It uses a single transformed
  * layer with a raster effect setting the scaling factor for each line
  *

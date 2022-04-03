@@ -6,7 +6,7 @@
  * 2015 Marc Palacios
  * http://www.tilengine.org
  *
- * This example show a barrel distortion effect similar to one of the stages
+ * This example shows a barrel distortion effect similar to one of the stages
  * in the SNES game "Super Castlevania IV"
  *
  ******************************************************************************/
