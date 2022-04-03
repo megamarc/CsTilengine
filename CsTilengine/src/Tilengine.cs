@@ -1205,11 +1205,11 @@ namespace Tilengine
         ///     </para>
         /// </remarks>
         /// <param name="filename">File with the resource package (.dat extension)</param>
-        /// <param name="key">Optional null-terminated ASCII string with aes decryption key.</param>
+        /// <param name="key">Optional null-terminated ASCII string with aes decryption key. Can be NULL.</param>
         /// <returns>true if the package was opened and made current, or false if an error occurred.</returns>
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_OpenResourcePack(string filename, string key);
+        public static extern bool TLN_OpenResourcePack(string filename, string? key);
 
         /// <summary>
         /// Closes current resource package and unbinds it.
