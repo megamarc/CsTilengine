@@ -257,14 +257,14 @@ namespace Tilengine
         public struct TLN_TileInfo
         {
             /// <summary>
-            /// Tile index
-            /// </summary>
-            public ushort index;
-
-            /// <summary>
             /// <see cref="TLN_TileFlags"/> Attributes
             /// </summary>
             public TLN_TileFlags flags;
+
+            /// <summary>
+            /// Tile index
+            /// </summary>
+            public ushort index;
 
             /// <summary>
             /// Row number in the tilemap
@@ -309,19 +309,10 @@ namespace Tilengine
         public struct TLN_ObjectInfo
         {
             /// <summary>
-            /// Unique ID
+            /// Object name
             /// </summary>
-            public ushort id;
-
-            /// <summary>
-            /// Graphic ID (tile index)
-            /// </summary>
-            public ushort gid;
-
-            /// <summary>
-            /// <see cref="TLN_TileFlags"/> Attributes
-            /// </summary>
-            public ushort flags;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+            public string name;
 
             /// <summary>
             /// Horizontal position
@@ -344,6 +335,21 @@ namespace Tilengine
             public int height;
 
             /// <summary>
+            /// Unique ID
+            /// </summary>
+            public ushort id;
+
+            /// <summary>
+            /// Graphic ID (tile index)
+            /// </summary>
+            public ushort gid;
+
+            /// <summary>
+            /// <see cref="TLN_TileFlags"/> Attributes
+            /// </summary>
+            public ushort flags;
+
+            /// <summary>
             /// Object type
             /// </summary>
             public byte type;
@@ -352,12 +358,6 @@ namespace Tilengine
             /// Object is visible
             /// </summary>
             public bool visible;
-
-            /// <summary>
-            /// Object name
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-            public string name;
         }
 
         /// <summary>
@@ -380,6 +380,7 @@ namespace Tilengine
         /// <summary>
         /// Pixel mapping for <see cref="TLN_SetLayerPixelMapping"/>
         /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
         public struct TLN_PixelMap
         {
             /// <summary>
@@ -396,6 +397,7 @@ namespace Tilengine
         /// <summary>
         /// Image tile for <see cref="TLN_CreateImageTileset"/>
         /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
         public struct TLN_TileImage
         {
             /// <summary>
@@ -417,6 +419,7 @@ namespace Tilengine
         /// <summary>
         /// Sprite state
         /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
         public struct TLN_SpriteState
         {
             /// <summary>
@@ -440,9 +443,14 @@ namespace Tilengine
             public int h;
 
             /// <summary>
+            /// Graphic index inside spriteset
+            /// </summary>
+            public int index;
+
+            /// <summary>
             /// Sprite flags
             /// </summary>
-            public uint flags;
+            public TLN_TileFlags flags;
 
             /// <summary>
             /// Assigned palette
@@ -453,11 +461,6 @@ namespace Tilengine
             /// Assigned spriteset
             /// </summary>
             public IntPtr spriteset;
-
-            /// <summary>
-            /// Graphic index inside spriteset
-            /// </summary>
-            public int index;
 
             /// <summary>
             /// Sprite is enabled.
@@ -554,7 +557,12 @@ namespace Tilengine
             /// <summary>
             /// User provided blend function with <see cref="TLN_SetCustomBlendFunction"/>
             /// </summary>
-            BLEND_CUSTOM
+            BLEND_CUSTOM,
+
+            /// <summary>
+            /// Color averaging
+            /// </summary>
+            BLEND_MIX = BLEND_MIX50
         }
 
         /// <summary>
