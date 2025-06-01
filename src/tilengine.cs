@@ -832,10 +832,19 @@ namespace Tilengine
         private static extern uint TLN_GetTicks();
 
         [DllImport("Tilengine")]
-        private static extern void TLN_BeginWindowFrame(int frame);
+        private static extern int GetAverageFps();
 
         [DllImport("Tilengine")]
-        private static extern void TLN_EndWindowFrame();
+        private static extern int TLN_GetWindowWidth();
+
+        [DllImport("Tilengine")]
+        private static extern int TLN_GetWindowHeight();
+
+        [DllImport("Tilengine")]
+        private static extern int TLN_GetWindowScaleFactor();
+
+        [DllImport("Tilengine")]
+        private static extern void TLN_SetWindowScaleFactor(int factor);
 
         /// <summary>
         /// Creates a window for rendering
@@ -914,7 +923,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Enables or disables input for specified player
         /// </summary>
         /// <param name="player">Player number to configure</param>
         /// <param name="enable"></param>
@@ -924,7 +933,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Assigns a joystick index to the specified player
         /// </summary>
         /// <param name="player">Player number to configure</param>
         /// <param name="index"></param>
@@ -934,7 +943,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Assigns a keyboard input to a player
         /// </summary>
         /// <param name="player">Player number to configure</param>
         /// <param name="input"></param>
@@ -945,7 +954,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Assigns a button joystick input to a player
         /// </summary>
         /// <param name="player">Player number to configure</param>
         /// <param name="input"></param>
@@ -953,16 +962,6 @@ namespace Tilengine
         public void DefineInputButton(Player player, Input input, byte joybutton)
         {
             TLN_DefineInputButton (player, input, joybutton);
-        }
-
-        /// <summary>
-        /// Begins active rendering frame
-        /// </summary>
-        /// <param name="frame">Timestamp value</param>
-        /// <remarks>Use this method instead of Engine::BeginFrame() when using build-in windowing</remarks>
-        public void BeginFrame(int frame)
-        {
-            TLN_BeginWindowFrame(frame);
         }
 
         /// <summary>
@@ -976,15 +975,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
-        /// </summary>
-        public void EndFrame()
-        {
-            TLN_EndWindowFrame();
-        }
-
-        /// <summary>
-        ///
+        /// Thread synchronization for multithreaded window. Waits until the current frame has ended rendering
         /// </summary>
         public void WaitRedraw()
         {
@@ -1008,16 +999,16 @@ namespace Tilengine
 		}
 
         /// <summary>
-        ///
+        /// Suspends execition for a fixed time
         /// </summary>
-        /// <param name="msecs"></param>
+        /// <param name="msecs">Number of milliseconds to wait</param>
         public void Delay(uint msecs)
         {
             TLN_Delay(msecs);
         }
 
         /// <summary>
-        ///
+        /// Returns the number of milliseconds since application start
         /// </summary>
         public uint Ticks
         {
@@ -1025,7 +1016,40 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns average frames per second
+        /// </summary>
+        public int AverageFPS
+        {
+            get { return GetAverageFps(); }
+        }
+
+        /// <summary>
+        /// Gets/sets integer window scaling factor
+        /// </summary>
+        public int ScaleFactor
+        {
+            get { return TLN_GetWindowScaleFactor(); }
+            set { TLN_SetWindowScaleFactor(value); }
+        }
+
+        /// <summary>
+        /// Returns window width in pixels
+        /// </summary>
+        public int Width
+        {
+            get { return TLN_GetWindowWidth(); }
+        }
+
+        /// <summary>
+        /// Returns window height in pixels
+        /// </summary>
+        public int Height
+        {
+            get { return TLN_GetWindowHeight(); }
+        }
+
+        /// <summary>
+        /// Destroys active window
         /// </summary>
         public void Delete()
         {
