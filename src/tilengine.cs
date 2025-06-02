@@ -1707,14 +1707,14 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_SetSpritesetData(IntPtr spriteset, int entry, SpriteData[] data, IntPtr pixels, int pitch);
+        private static extern bool TLN_SetSpritesetData(IntPtr spriteset, int entry, SpriteData[] data, byte[] pixels, int pitch);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         private static extern bool TLN_DeleteSpriteset(IntPtr Spriteset);
 
         /// <summary>
-        ///
+        /// Internal constructor
         /// </summary>
         /// <param name="res"></param>
         internal Spriteset (IntPtr res)
@@ -1723,10 +1723,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a new spriteset
         /// </summary>
-        /// <param name="bitmap"></param>
-        /// <param name="data"></param>
+        /// <param name="bitmap">Bitmap containing the sprite graphics</param>
+        /// <param name="data">Array of SpriteData structures with sprite descriptions</param>
         public Spriteset (Bitmap bitmap, SpriteData[] data)
         {
             IntPtr retval = TLN_CreateSpriteset(bitmap.ptr, data, data.Length);
@@ -1735,10 +1735,13 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Loads a spriteset from an image png and its associated atlas descriptor
         /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
+        /// <param name="filename">Base name of the files containing the spriteset, with or without .png extension</param>
+        /// <remarks>
+        /// The spriteset comes in a pair of files: an image file(bmp or png) and a standarized atlas descriptor(json, csv or txt)
+        /// The supported json format is the array.
+        /// </remarks>
         public static Spriteset FromFile (string filename)
         {
             IntPtr retval = TLN_LoadSpriteset (filename);
@@ -1747,9 +1750,9 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a duplicate of the specified spriteset and its associated palette
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Cloned spriteset</returns>
         public Spriteset Clone ()
         {
             IntPtr retval = TLN_CloneSpriteset(ptr);
@@ -1758,10 +1761,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Query the details about the specified sprite inside a spriteset
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="info"></param>
+        /// <param name="index">The entry index inside the spriteset [0, num_sprites - 1]</param>
+        /// <param name="info">Pointer to application-allocated SpriteInfo structure that will receive the data</param>
         public void GetInfo (int index, out SpriteInfo info)
         {
             bool ok = TLN_GetSpriteInfo (ptr, index, out info);
@@ -1769,7 +1772,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the palette associated to the spriteset
         /// </summary>
         public Palette Palette
         {
@@ -1777,33 +1780,32 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the index of a sprite inside the spriteset by its name
         /// </summary>
         /// <param name="name"></param>
-        /// <returns></returns>
+        /// <returns>Index of the sprite</returns>
         public int FindSprite(string name)
         {
             int index = TLN_FindSpritesetSprite(ptr, name);
             Engine.ThrowException(index != -1);
             return index;
-
         }
 
         /// <summary>
-        ///
+        /// Sets attributes and pixels of a given sprite inside the spriteset
         /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="data"></param>
-        /// <param name="pixels"></param>
+        /// <param name="entry">The entry index inside the spriteset to modify [0, num_sprites - 1]</param>
+        /// <param name="data">Pointer to a user-provided SpriteData structure with sprite description</param>
+        /// <param name="pixels">Pointer to source pixel data</param>
         /// <param name="pitch"></param>
-        public void TLN_SetSpritesetData(int entry, SpriteData[] data, IntPtr pixels, int pitch)
+        public void SetSpritesetData(int entry, SpriteData[] data, byte[] pixels, int pitch)
         {
             bool ok = TLN_SetSpritesetData(ptr, entry, data, pixels, pitch);
             Engine.ThrowException(ok);
         }
 
         /// <summary>
-        ///
+        /// Deletes the spriteset and releases memory
         /// </summary>
         public void Delete ()
         {
