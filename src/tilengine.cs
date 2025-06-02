@@ -2219,11 +2219,14 @@ namespace Tilengine
         private static extern IntPtr TLN_GetPaletteData(IntPtr palette, int index);
 
         [DllImport("Tilengine")]
+        private static extern int TLN_GetPaletteNumColors(IntPtr palette);
+
+        [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         private static extern bool TLN_DeletePalette(IntPtr palette);
 
         /// <summary>
-        ///
+        /// Internal constructor for creating a Palette from an existing resource pointer
         /// </summary>
         /// <param name="res"></param>
         internal Palette (IntPtr res)
@@ -2232,9 +2235,9 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a new palette with the specified number of entries.
         /// </summary>
-        /// <param name="entries"></param>
+        /// <param name="entries">Number of color entries, up to 256</param>
         public Palette(int entries)
         {
             IntPtr retval = TLN_CreatePalette(entries);
@@ -2243,10 +2246,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Loads a palette from a standard .act file (Adobe Color Table)
         /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
+        /// <param name="filename">ACT file containing the palette to load</param>
+        /// <returns>Loaded palette</returns>
         public static Palette FromFile(string filename)
         {
             IntPtr retval = TLN_LoadPalette(filename);
@@ -2255,9 +2258,9 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a duplicate of the palette
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Cloned object</returns>
         public Palette Clone()
         {
             IntPtr retval = TLN_ClonePalette(ptr);
@@ -2266,10 +2269,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Sets the RGB color value of a palette entry
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="color"></param>
+        /// <param name="index">Index of the palette entry to modify (0-255)</param>
+        /// <param name="color">RGB Color value</param>
         public void SetColor(int index, Color color)
         {
             bool ok = TLN_SetPaletteColor(ptr, index, color.R, color.G, color.B);
@@ -2277,23 +2280,23 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Mixes palette with a second palette using a factor.
         /// </summary>
-        /// <param name="src1"></param>
-        /// <param name="src2"></param>
-        /// <param name="factor"></param>
-        public void Mix(Palette src1, Palette src2, byte factor)
+        /// <param name="palette">Palette to mix with</param>
+        /// <param name="factor">Mix factor [0-255], 0=100% source, 255=100% destination</param>
+        /// <remarks>The original palette gets modified with the mix, no third palette is created</remarks>
+        public void Mix(Palette palette, byte factor=128)
         {
-            bool ok = TLN_MixPalettes(src1.ptr, src2.ptr, ptr, factor);
+            bool ok = TLN_MixPalettes(ptr, palette.ptr, ptr, factor);
             Engine.ThrowException(ok);
         }
 
         /// <summary>
-        ///
+        /// Modifies a range of colors by adding the provided color value to the selected range. The result is always a brighter color.
         /// </summary>
-        /// <param name="color"></param>
-        /// <param name="first"></param>
-        /// <param name="count"></param>
+        /// <param name="color">Color to add</param>
+        /// <param name="first">index of the first color entry to modify</param>
+        /// <param name="count">number of colors from start to modify</param>
         public void AddColor(Color color, byte first, byte count)
         {
             bool ok = TLN_AddPaletteColor(ptr, color.R, color.G, color.B, first, count);
@@ -2301,11 +2304,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Modifies a range of colors by subtracting the provided color value to the selected range. The result is always a darker color.
         /// </summary>
-        /// <param name="color"></param>
-        /// <param name="first"></param>
-        /// <param name="count"></param>
+        /// <param name="color">Color to substract</param>
+        /// <param name="first">index of the first color entry to modify</param>
+        /// <param name="count">number of colors from start to modify</param>
         public void SubColor(Color color, byte first, byte count)
         {
             bool ok = TLN_SubPaletteColor(ptr, color.R, color.G, color.B, first, count);
@@ -2313,11 +2316,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Modifies a range of colors by modulating (normalized product) the provided color value to the selected range. The result is always a darker color.
         /// </summary>
-        /// <param name="color"></param>
-        /// <param name="first"></param>
-        /// <param name="count"></param>
+        /// <param name="color">Color to modulate (multiply)</param>
+        /// <param name="first">index of the first color entry to modify</param>
+        /// <param name="count">number of colors from start to modify</param>
         public void MulColor(Color color, byte first, byte count)
         {
             bool ok =  TLN_ModPaletteColor(ptr, color.R, color.G, color.B, first, count);
@@ -2325,7 +2328,15 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the number of colors in the palette
+        /// </summary>
+        public int NumColors
+        {
+            get { return TLN_GetPaletteNumColors(ptr); }
+        }
+
+        /// <summary>
+        /// Deletes palette and releases used memory
         /// </summary>
         public void Delete()
         {
