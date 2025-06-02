@@ -368,9 +368,12 @@ namespace Tilengine
     /// <summary>
     /// Main object for engine creation and rendering
     /// </summary>
-    public struct Engine
+    public class Engine
     {
-		public Layer[] Layers;
+        // singleton
+        private static Engine instance = null;
+
+        public Layer[] Layers;
 		public Sprite[] Sprites;
 		public Animation[] Animations;
 
@@ -515,9 +518,13 @@ namespace Tilengine
         /// <remarks>This is a singleton object: calling Init multiple times will return the same reference</remarks>
         public static Engine Init(int hres, int vres, int numLayers, int numSprites, int numAnimations)
         {
-            bool ok = TLN_Init(hres, vres, numLayers, numSprites, numAnimations);
-            Engine.ThrowException(ok);
-            Engine instance = new Engine(hres, vres, numLayers, numSprites, numAnimations);
+            // singleton
+            if (instance == null)
+            {
+                bool ok = TLN_Init(hres, vres, numLayers, numSprites, numAnimations);
+                Engine.ThrowException(ok);
+                instance = new Engine(hres, vres, numLayers, numSprites, numAnimations);
+            }
             return instance;
         }
 
@@ -769,11 +776,10 @@ namespace Tilengine
     /// <summary>
     /// Built-in windowing and user input
     /// </summary>
-    public struct Window
+    public class Window
     {
         // singleton
         private static Window instance;
-        private static bool init;
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -856,11 +862,10 @@ namespace Tilengine
         public static Window Create(string overlay, WindowFlags flags)
         {
             // singleton
-            if (!init)
+            if (instance == null)
             {
                 bool retval = TLN_CreateWindow (overlay, flags);
                 Engine.ThrowException(retval);
-                init = true;
                 instance = new Window();
             }
             return instance;
@@ -876,11 +881,10 @@ namespace Tilengine
         public static Window CreateThreaded(string overlay, WindowFlags flags)
         {
             // singleton
-            if (!init)
+            if (instance == null)
             {
                 bool retval = TLN_CreateWindowThread (overlay, flags);
                 Engine.ThrowException(retval);
-                init = true;
                 instance = new Window();
             }
             return instance;
@@ -1678,7 +1682,7 @@ namespace Tilengine
     /// <summary>
     /// Spriteset resource
     /// </summary>
-    public struct Spriteset
+    public class Spriteset
     {
         internal IntPtr ptr;
 
@@ -1974,7 +1978,7 @@ namespace Tilengine
     /// <summary>
     /// Tilemap resource
     /// </summary>
-    public struct Tilemap
+    public class Tilemap
     {
         internal IntPtr ptr;
 
@@ -2141,7 +2145,7 @@ namespace Tilengine
     /// <summary>
     /// Palette resource
     /// </summary>
-    public struct Palette
+    public class Palette
     {
         internal IntPtr ptr;
 
@@ -2297,7 +2301,7 @@ namespace Tilengine
     /// <summary>
     /// Bitmap resource
     /// </summary>
-    public struct Bitmap
+    public class Bitmap
     {
         internal IntPtr ptr;
 
@@ -2461,7 +2465,7 @@ namespace Tilengine
     /// <summary>
     /// Sequence resource
     /// </summary>
-    public struct Sequence
+    public class Sequence
     {
         internal IntPtr ptr;
 
