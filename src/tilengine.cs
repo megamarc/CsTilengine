@@ -2389,7 +2389,7 @@ namespace Tilengine
         private static extern bool TLN_DeleteBitmap(IntPtr bitmap);
 
         /// <summary>
-        ///
+        /// Internal constructor for creating a Bitmap from an existing resource pointer
         /// </summary>
         /// <param name="res"></param>
         internal Bitmap(IntPtr res)
@@ -2398,11 +2398,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a new memory bitmap with the specified width, height and bits per pixel (bpp).
         /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="bpp"></param>
+        /// <param name="width">Width in pixels</param>
+        /// <param name="height">Height in pixels</param>
+        /// <param name="bpp">Bits per pixel</param>
         public Bitmap(int width, int height, int bpp)
         {
             IntPtr retval = TLN_CreateBitmap(width, height, bpp);
@@ -2411,10 +2411,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Loads a .png or .bmp bitmap from a file.
         /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
+        /// <param name="filename">Path of the bitmap file to load</param>
+        /// <returns>Created Bitmap object</returns>
         public static Bitmap FromFile(string filename)
         {
             IntPtr retval = TLN_LoadBitmap(filename);
@@ -2423,9 +2423,9 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a duplicate of the bitmap, including its pixel data and palette.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Cloned object</returns>
         public Bitmap Clone()
         {
             IntPtr retval = TLN_CloneBitmap(ptr);
@@ -2434,7 +2434,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Raw pixel data
+        /// Gets/sets Raw pixel data
         /// </summary>
         public byte[] PixelData
         {
@@ -2455,7 +2455,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns with in pixels
         /// </summary>
         public int Width
         {
@@ -2463,7 +2463,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns height in pixels
         /// </summary>
         public int Height
         {
@@ -2471,7 +2471,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns bitmap depth in bits per pixel (bpp)
         /// </summary>
         public int Depth
         {
@@ -2479,7 +2479,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the pitch (bytes per scanline) of the bitmap in bytes.
         /// </summary>
         public int Pitch
         {
@@ -2487,7 +2487,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the Palette object of the bitmap
         /// </summary>
         public Palette Palette
         {
@@ -2500,7 +2500,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Deletes bitmap and releases used memory
         /// </summary>
         public void Delete()
         {
