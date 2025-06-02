@@ -245,7 +245,7 @@ namespace Tilengine
 	}
 
 	/// <summary>
-	/// Image Tile items for TLN_CreateImageTileset()
+	/// Image Tile items for cref="Tileset.FromImages"
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
 	public struct TileImage
@@ -1812,7 +1812,7 @@ namespace Tilengine
     /// <summary>
     /// Tileset resource
     /// </summary>
-    public struct Tileset
+    public class Tileset
     {
         internal IntPtr ptr;
 
@@ -1820,14 +1820,13 @@ namespace Tilengine
         private static extern IntPtr TLN_CreateTileset(int numtiles, int width, int height, IntPtr palette, IntPtr sequencepack, TileAttributes[] attributes);
 
         [DllImport("Tilengine")]
+        private static extern IntPtr TLN_CreateImageTileset(int numtiles, TileImage[] images);
+
+        [DllImport("Tilengine")]
         private static extern IntPtr TLN_LoadTileset(string filename);
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CloneTileset(IntPtr src);
-
-        [DllImport("Tilengine")]
-        [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_CopyTile(IntPtr tileset, int src, int dst);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1840,6 +1839,9 @@ namespace Tilengine
         private static extern int TLN_GetTileHeight(IntPtr tileset);
 
         [DllImport("Tilengine")]
+        private static extern int TLN_GetTilesetNumTiles(IntPtr tileset);
+
+        [DllImport("Tilengine")]
         private static extern IntPtr TLN_GetTilesetPalette(IntPtr tileset);
 
         [DllImport("Tilengine")]
@@ -1850,7 +1852,7 @@ namespace Tilengine
         private static extern bool TLN_DeleteTileset(IntPtr tileset);
 
         /// <summary>
-        ///
+        /// Internal constructor
         /// </summary>
         /// <param name="res"></param>
         internal Tileset (IntPtr res)
@@ -1859,26 +1861,27 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a tile-based tileset
         /// </summary>
-        /// <param name="numTiles"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="palette"></param>
-        /// <param name="sp"></param>
-        /// <param name="attributes"></param>
-        public Tileset(int numTiles, int width, int height, Palette palette, SequencePack sp, TileAttributes[] attributes)
+        /// <param name="numTiles">Number of tiles that the tileset will hold</param>
+        /// <param name="width">Width of each tile (must be multiple of 8)</param>
+        /// <param name="height">Height of each tile (must be multiple of 8)</param>
+        /// <param name="palette">Palette object to assign</param>
+        /// <param name="sp">Optional sequence pack with associated tileset animations. Can be null</param>
+        /// <param name="attributes">Optional array of attributes, one for each tile. Can be null</param>
+        public Tileset(int numTiles, int width, int height, Palette palette, SequencePack sp=null, TileAttributes[] attributes=null)
         {
-            IntPtr retval = TLN_CreateTileset(numTiles, width, height, palette.ptr, sp.ptr, attributes);
+            IntPtr retval = TLN_CreateTileset(numTiles, width, height, palette.ptr, sp.ptr != null ? sp.ptr : IntPtr.Zero, attributes);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
         }
 
         /// <summary>
-        ///
+        /// Loads a tileset from a Tiled .tsx file
         /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
+        /// <param name="filename">TSX file to load</param>
+        /// <returns>Reference to the newly loaded tileset</returns>
+        /// <remarks>An associated palette is also created, it can be obtained with the property cref="Tileset::Palette"</remarks>
         public static Tileset FromFile(string filename)
         {
             IntPtr retval = TLN_LoadTileset(filename);
@@ -1886,10 +1889,17 @@ namespace Tilengine
             return new Tileset(retval);
         }
 
+        public static Tileset FromImages(int numTiles, TileImage[] images)
+        {
+            IntPtr retval = TLN_CreateImageTileset(numTiles, images);
+            Engine.ThrowException(retval != IntPtr.Zero);
+            return new Tileset(retval);
+        }
+
         /// <summary>
-        ///
+        /// Creates a duplicate of the specified tileset and its associated palette
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A reference to the newly cloned tileset</returns>
         public Tileset Clone()
         {
             IntPtr retval = TLN_CloneTileset(ptr);
@@ -1898,11 +1908,12 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Sets pixel data for a tile in a tile-based tileset
         /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="pixels"></param>
-        /// <param name="pitch"></param>
+        /// <param name="entry">Number of tile to set [0, num_tiles - 1]</param>
+        /// <param name="pixels">Array of bytes with source pixel data</param>
+        /// <param name="pitch">Bytes per line of source data</param>
+        /// <remarks>Care must be taken in providing pixel data and pitch as it can crash the aplication</remarks>
         public void SetPixels(int entry, byte[] pixels, int pitch)
         {
             bool ok = TLN_SetTilesetPixels(ptr, entry, pixels, pitch);
@@ -1910,18 +1921,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
-        /// </summary>
-        /// <param name="src"></param>
-        /// <param name="dst"></param>
-        public void CopyTile(int src, int dst)
-        {
-            bool ok = TLN_CopyTile(ptr, src, dst);
-            Engine.ThrowException(ok);
-        }
-
-        /// <summary>
-        ///
+        /// Returns the width in pixels of each individual tile in the tileset
         /// </summary>
         public int Width
         {
@@ -1929,7 +1929,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the height in pixels of each individual tile in the tileset
         /// </summary>
         public int Height
         {
@@ -1937,7 +1937,15 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the number of different tiles in tileset
+        /// </summary>
+        public int NumTiles
+        {
+            get { return TLN_GetTilesetNumTiles(ptr); }
+        }
+
+        /// <summary>
+        /// Returns a reference to the palette associated to the tileset
         /// </summary>
         public Palette Palette
         {
@@ -1945,7 +1953,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns a reference to the optional sequence pack associated to the tileset
         /// </summary>
         public SequencePack SequencePack
         {
@@ -1953,7 +1961,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Deletes the tileset and releases used memory
         /// </summary>
         public void Delete()
         {
@@ -2543,7 +2551,7 @@ namespace Tilengine
     /// <summary>
     /// SequencePack resource
     /// </summary>
-    public struct SequencePack
+    public class SequencePack
     {
         internal IntPtr ptr;
 
