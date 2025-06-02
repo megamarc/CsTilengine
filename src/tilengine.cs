@@ -225,7 +225,7 @@ namespace Tilengine
     }
 
 	/// <summary>
-	/// Data returned by cref="Layer.GetObjectInfo" about a given object inside an objects layer
+	/// Data returned by cref="ObjectList.GetInfo" about a given object inside an objects layer
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 	public struct ObjectInfo
@@ -2169,7 +2169,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Deletes the specified tilemap and releases memory
+        /// Deletes the tilemap and releases memory
         /// </summary>
         public void Delete()
         {
@@ -2336,7 +2336,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Deletes palette and releases used memory
+        /// Deletes palette and releases memory
         /// </summary>
         public void Delete()
         {
@@ -2500,11 +2500,118 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Deletes bitmap and releases used memory
+        /// Deletes bitmap and releases memory
         /// </summary>
         public void Delete()
         {
             bool ok = TLN_DeleteBitmap(ptr);
+            Engine.ThrowException(ok);
+            ptr = IntPtr.Zero;
+        }
+    }
+
+    /// <summary>
+    /// ObjectList resource
+    /// </summary>
+    public class ObjectList
+    {
+        internal IntPtr ptr;
+
+        [DllImport("Tilengine")] 
+        private static extern IntPtr TLN_CreateObjectList();
+
+        [DllImport("Tilengine")]
+        private static extern IntPtr TLN_LoadObjectList(string filename, string layername);
+
+        [DllImport("Tilengine")]
+        private static extern IntPtr TLN_CloneObjectList(IntPtr src);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_AddTileObjectToList(IntPtr list, ushort id, ushort gid, ushort flags, int x, int y);
+
+        [DllImport("Tilengine")]
+        private static extern int TLN_GetListNumObjects(IntPtr list);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_GetListObject(IntPtr list, out ObjectInfo info);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_DeleteObjectList(IntPtr list);
+
+        /// <summary>
+        /// Internal constructor for creating an ObjectList from an existing resource pointer
+        /// </summary>
+        /// <param name="res"></param>
+        internal ObjectList(IntPtr res)
+        {
+            ptr = res;
+        }
+
+        /// <summary>
+        /// Creates an empty object list.that must be populated with cref="ObjectList.Add" />
+        /// </summary>
+        public ObjectList()
+        {
+            IntPtr retval = TLN_CreateObjectList();
+            Engine.ThrowException(retval != IntPtr.Zero);
+            ptr = retval;
+        }
+
+        /// <summary>
+        /// Loads an object list from a Tiled object layer
+        /// </summary>
+        /// <param name="filename">Path of the .tmx file containing the list</param>
+        /// <param name="layername">Name of the layer to load</param>
+        /// <returns>Created object</returns>
+        public static ObjectList FromFile(string filename, string layername)
+        {
+            IntPtr retval = TLN_LoadObjectList(filename, layername);
+            Engine.ThrowException(retval != IntPtr.Zero);
+            return new ObjectList(retval);
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the object list
+        /// </summary>
+        /// <returns>Cloned object</returns>
+        public ObjectList Clone()
+        {
+            IntPtr retval = TLN_CloneObjectList(ptr);
+            Engine.ThrowException(retval != IntPtr.Zero);
+            return new ObjectList(retval);
+        }
+
+        /// <summary>
+        /// Adds an image-based tile (rectangle) item to the list
+        /// </summary>
+        /// <param name="id">Unique ID of the object inside the list</param>
+        /// <param name="gid">Graphic Id (tile index) of the tileset object</param>
+        /// <param name="flags">Combination of Flags</param>
+        /// <param name="x">Layer-space horizontal coordinate of the top-left corner</param>
+        /// <param name="y">Layer-space bertical coordinate of the top-left corner</param>
+        public void Add(ushort id, ushort gid, ushort flags, int x, int y)
+        {
+            bool ok = TLN_AddTileObjectToList(ptr, id, gid, flags, x, y);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Returns the number of objects in the list
+        /// </summary>
+        public int Length
+        {
+            get { return TLN_GetListNumObjects(ptr); }
+        }
+
+        /// <summary>
+        /// Deletes object list and releases memory
+        /// </summary>
+        public void Delete()
+        {
+            bool ok = TLN_DeleteObjectList(ptr);
             Engine.ThrowException(ok);
             ptr = IntPtr.Zero;
         }
@@ -2528,7 +2635,7 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_GetSequenceInfo(IntPtr sequence, ref SequenceInfo info);
+        private static extern bool TLN_GetSequenceInfo(IntPtr sequence, out SequenceInfo info);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -2583,9 +2690,9 @@ namespace Tilengine
         ///
         /// </summary>
         /// <param name="info"></param>
-        public void GetInfo(ref SequenceInfo info)
+        public void GetInfo(out SequenceInfo info)
         {
-            bool ok = TLN_GetSequenceInfo(ptr, ref info);
+            bool ok = TLN_GetSequenceInfo(ptr, out info);
             Engine.ThrowException(ok);
         }
 
