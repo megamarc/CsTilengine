@@ -382,8 +382,7 @@ namespace Tilengine
         public uint Version;	// Tilengine dll version, in a 32-bit integer
 
         [DllImport("Tilengine")]
-        [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_Init(int hres, int vres, int numlayers, int numsprites, int numanimations);
+        private static extern IntPtr TLN_Init(int hres, int vres, int numlayers, int numsprites, int numanimations);
 
         [DllImport("Tilengine")]
         private static extern void TLN_Deinit();
@@ -521,8 +520,8 @@ namespace Tilengine
             // singleton
             if (instance == null)
             {
-                bool ok = TLN_Init(hres, vres, numLayers, numSprites, numAnimations);
-                Engine.ThrowException(ok);
+                IntPtr retval = TLN_Init(hres, vres, numLayers, numSprites, numAnimations);
+                Engine.ThrowException(retval != IntPtr.Zero);
                 instance = new Engine(hres, vres, numLayers, numSprites, numAnimations);
             }
             return instance;
@@ -1985,7 +1984,7 @@ namespace Tilengine
         internal IntPtr ptr;
 
         [DllImport("Tilengine")]
-        private static extern IntPtr TLN_CreateTilemap(int rows, int cols, Tile[] tiles, uint bgcolor, Tileset tileset);
+        private static extern IntPtr TLN_CreateTilemap(int rows, int cols, Tile[] tiles, uint bgcolor, IntPtr tileset);
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_LoadTilemap(string filename, string layername);
@@ -2000,7 +1999,11 @@ namespace Tilengine
         private static extern int TLN_GetTilemapCols(IntPtr tilemap);
 
         [DllImport("Tilengine")]
-        private static extern IntPtr TLN_GetTilemapTileset(IntPtr tilemap);
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_SetTilemapTileset2(IntPtr tilemap, IntPtr tileset, int index);
+
+        [DllImport("Tilengine")] 
+        private static extern IntPtr TLN_GetTilemapTileset2(IntPtr tilemap, int index);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -2015,11 +2018,14 @@ namespace Tilengine
         private static extern bool TLN_CopyTiles(IntPtr src, int srcrow, int srccol, int rows, int cols, IntPtr dst, int dstrow, int dstcol);
 
         [DllImport("Tilengine")]
+        private static extern IntPtr TLN_GetTilemapTiles(IntPtr tilemap, int row, int col);
+        
+        [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         private static extern bool TLN_DeleteTilemap(IntPtr tilemap);
 
         /// <summary>
-        ///
+        /// Intrernal constructor
         /// </summary>
         /// <param name="res"></param>
         internal Tilemap (IntPtr res)
@@ -2028,28 +2034,28 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a new tilemap with the specified number of rows and columns, using the provided tiles and background color.
         /// </summary>
-        /// <param name="rows"></param>
-        /// <param name="cols"></param>
-        /// <param name="tiles"></param>
-        /// <param name="bgcolor"></param>
-        /// <param name="tileset"></param>
-        public Tilemap(int rows, int cols, Tile[] tiles, Color bgcolor, Tileset tileset)
+        /// <param name="rows">Number of rows (vertical dimension)</param>
+        /// <param name="cols">Number of columns (horizontal dimension)</param>
+        /// <param name="tiles">Array of Tile structures with tile data</param>
+        /// <param name="bgcolor">Background color value</param>
+        /// <param name="tileset">Optional reference to associated tileset, can be null</param>
+        public Tilemap(int rows, int cols, Tile[] tiles, Color bgcolor, Tileset tileset=null)
         {
             long color;
             color = 0xFF000000 + (bgcolor.R << 16) + (bgcolor.G << 8) + bgcolor.B;
 
-            IntPtr retval = TLN_CreateTilemap(rows, cols, tiles, (uint)color, tileset);
+            IntPtr retval = TLN_CreateTilemap(rows, cols, tiles, (uint)color, tileset != null? tileset.ptr : IntPtr.Zero);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
         }
 
         /// <summary>
-        ///
+        /// Loads a tilemap layer from a Tiled .tmx file
         /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="layername"></param>
+        /// <param name="filename">TMX file with the tilemap</param>
+        /// <param name="layername">Optional name of the layer inside the tmx file to load. null to load the first layer</param>
         /// <returns></returns>
         public static Tilemap FromFile(string filename, string layername)
         {
@@ -2059,9 +2065,9 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a duplicate of the tilemap
         /// </summary>
-        /// <returns></returns>
+        /// <returns> Cloned tilemap object</returns>
         public Tilemap Clone()
         {
             IntPtr retval = TLN_CloneTilemap(ptr);
@@ -2070,7 +2076,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the number of columns
         /// </summary>
         public int Cols
         {
@@ -2078,7 +2084,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the number of rows
         /// </summary>
         public int Rows
         {
@@ -2086,19 +2092,47 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Gets/sets the default tileset associated to the tilemap
         /// </summary>
         public Tileset Tileset
         {
-            get { return new Tileset(TLN_GetTilemapTileset(ptr)); }
+            get { return new Tileset(TLN_GetTilemapTileset2(ptr, 0)); }
+            set
+            {
+                bool ok = TLN_SetTilemapTileset2(ptr, value.ptr, 0);
+                Engine.ThrowException(ok);
+            }
         }
 
         /// <summary>
-        ///
+        /// Sets a tileset at the specified index in the tilemap.
         /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <param name="tile"></param>
+        /// <param name="tileset">Tileset to set</param>
+        /// <param name="index">Tileset index [0 - 7]</param>
+        public void SetTileset(Tileset tileset, int index)
+        {
+            bool ok = TLN_SetTilemapTileset2(ptr, tileset.ptr, index);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Gets the tileset at the specified index in the tilemap.
+        /// </summary>
+        /// <param name="index">Tileset index [0 - 7]</param>
+        /// <returns>Tileset at given position</returns>
+        public Tileset GetTileset(int index)
+        {
+            IntPtr tilesetPtr = TLN_GetTilemapTileset2(ptr, index);
+            Engine.ThrowException(tilesetPtr != IntPtr.Zero);
+            return new Tileset(tilesetPtr);
+        }
+
+        /// <summary>
+        /// Sets a tile of a tilemap
+        /// </summary>
+        /// <param name="row">Row (vertical position) of the tile [0 - num_rows - 1]</param>
+        /// <param name="col">Column (horizontal position) of the tile [0 - num_cols - 1]</param>
+        /// <param name="tile">Tile data to set</param>
         public void SetTile(int row, int col, ref Tile tile)
         {
             bool ok = TLN_SetTilemapTile(ptr, row, col, ref tile);
@@ -2106,11 +2140,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Gets data of a single tile inside a tilemap
         /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <param name="tile"></param>
+        /// <param name="row">Row (vertical position) of the tile [0 - num_rows - 1]</param>
+        /// <param name="col">Column (horizontal position) of the tile [0 - num_cols - 1]</param>
+        /// <param name="tile">Application-allocated Tile structure that will get the data</param>
         public void GetTile(int row, int col, out Tile tile)
         {
             bool ok = TLN_GetTilemapTile(ptr, row, col, out tile);
@@ -2118,15 +2152,16 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Copies rectangular blocks of tiles between two tilemaps
         /// </summary>
-        /// <param name="srcRow"></param>
-        /// <param name="srcCol"></param>
-        /// <param name="rows"></param>
-        /// <param name="cols"></param>
-        /// <param name="dst"></param>
-        /// <param name="dstRow"></param>
-        /// <param name="dstCol"></param>
+        /// <param name="srcRow">Starting row (vertical position) inside the source tilemap</param>
+        /// <param name="srcCol">Starting column (horizontal position) inside the source tilemap</param>
+        /// <param name="rows">Number of rows to copy</param>
+        /// <param name="cols">Number of columns to copy</param>
+        /// <param name="dst">Destination tilemap</param>
+        /// <param name="dstRow">Starting row (vertical position) inside the target tilemap</param>
+        /// <param name="dstCol">Starting column (horizontal position) inside the target tilemap</param>
+        /// <remarks>Use this function to implement tile streaming</remarks>
         public void CopyTiles(int srcRow, int srcCol, int rows, int cols, Tilemap dst, int dstRow, int dstCol)
         {
             bool ok = TLN_CopyTiles(ptr, srcRow, srcCol, rows, cols, dst.ptr, dstRow, dstCol);
@@ -2134,7 +2169,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Deletes the specified tilemap and releases memory
         /// </summary>
         public void Delete()
         {
