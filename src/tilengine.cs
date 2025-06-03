@@ -29,6 +29,7 @@ SOFTWARE.
 
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 
 namespace Tilengine
 {
@@ -1061,7 +1062,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Layer management
+    /// Background layer management
     /// </summary>
     public struct Layer
     {
@@ -1073,11 +1074,25 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_SetLayerTilemap(int nlayer, IntPtr tilemap);
+
+        [DllImport("Tilengine")]
+        private static extern IntPtr TLN_GetLayerTilemap(int nlayer);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
         private static extern bool TLN_SetLayerPalette(int nlayer, IntPtr palette);
+
+        [DllImport("Tilengine")]
+        private static extern IntPtr TLN_GetLayerPalette(int nlayer);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         private static extern bool TLN_SetLayerBitmap(int nlayer, IntPtr bitmap);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern IntPtr TLN_GetLayerBitmap(int nlayer);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1105,11 +1120,19 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_SetLayerClip(int nlayer, int x1, int y1, int x2, int y2);
+        private static extern bool TLN_SetLayerWindow(int nlayer, int x1, int y1, int x2, int y2, bool invert);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_DisableLayerClip(int nlayer);
+        private static extern bool TLN_SetLayerWindowColor(int nlayer, byte r, byte g, byte b, Blend blend);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_DisableLayerWindow(int nlayer);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_DisableLayerWindowColor(int nlayer);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1125,10 +1148,23 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_SetLayerPriority(int nlayer, bool enable);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_SetLayerParent(int nlayer, int parent);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_DisableLayerParent(int nlayer);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
         private static extern bool TLN_DisableLayer(int nlayer);
 
         [DllImport("Tilengine")]
-        private static extern IntPtr TLN_GetLayerPalette(int nlayer);
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_EnableLayer(int nlayer);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1140,11 +1176,28 @@ namespace Tilengine
         [DllImport("Tilengine")]
         private static extern int TLN_GetLayerHeight(int nlayer);
 
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_SetLayerObjects(int nlayer, IntPtr objects, IntPtr tileset);
+
+        [DllImport("Tilengine")]
+        private static extern IntPtr TLN_GetLayerObjects(int nlayer);
+
+        [DllImport("Tilengine")]
+        private static extern IntPtr TLN_GetLayerTileset(int nlayer);
+
+        [DllImport("Tilengine")]
+        private static extern int TLN_GetLayerX(int nlayer);
+
+        [DllImport("Tilengine")] 
+        private static extern int TLN_GetLayerY(int nlayer);
+
         /// <summary>
-        ///
+        /// Set up a Tile layer with explicit Tileset and Tilemap
         /// </summary>
-        /// <param name="tileset"></param>
-        /// <param name="tilemap"></param>
+        /// <param name="tileset">Tileset object to set</param>
+        /// <param name="tilemap">Tilemap object to set</param>
+        /// <remarks>Deprecated, use property cref="Tilemap" instead to configure a Tile layer</remarks>
         public void Setup(Tileset tileset, Tilemap tilemap)
         {
             bool ok = TLN_SetLayer(index, tileset.ptr, tilemap.ptr);
@@ -1152,9 +1205,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Set up a Tile layer with given Tilemap
         /// </summary>
-        /// <param name="tilemap"></param>
+        /// <param name="tilemap">Tilemap object to set</param>
+        /// /// <remarks>Deprecated, use property cref="Tilemap" instead to configure a Tile layer</remarks>
         public void SetMap(Tilemap tilemap)
         {
             bool ok = TLN_SetLayer(index, IntPtr.Zero, tilemap.ptr);
@@ -1173,10 +1227,15 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Sets simple scaling
         /// </summary>
-        /// <param name="sx"></param>
-        /// <param name="sy"></param>
+        /// <param name="sx">Horizontal scale factor</param>
+        /// <param name="sy">Vertical scale factor</param>
+        /// <remarks>
+        /// By default the scaling factor of a given layer is 1.0f, 1.0f, which means
+        /// no scaling.Use values below 1.0 to downscale (shrink) and above 1.0 to upscale (enlarge).
+        /// Call cref="Reset" to disable scaling
+        /// </remarks>
         public void SetScaling(float sx, float sy)
         {
             bool ok = TLN_SetLayerScaling(index, sx, sy);
@@ -1184,13 +1243,13 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Sets affine transform matrix to enable rotating and/or scaling
         /// </summary>
-        /// <param name="angle"></param>
-        /// <param name="dx"></param>
-        /// <param name="dy"></param>
-        /// <param name="sx"></param>
-        /// <param name="sy"></param>
+        /// <param name="angle">Rotation angle in degrees</param>
+        /// <param name="dx">Horizontal displacement</param>
+        /// <param name="dy">Vertical displacement</param>
+        /// <param name="sx">Horizontal scaling</param>
+        /// <param name="sy">Vertical scaling</param>
         public void SetTransform(float angle, float dx, float dy, float sx, float sy)
         {
             bool ok = TLN_SetLayerTransform(index, angle, dx, dy, sx, sy);
@@ -1198,17 +1257,20 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Sets the table for pixel mapping render mode
         /// </summary>
 		/// <param name="map"></param>
-		public void SetPixelMapping(PixelMap[] map)
+		public PixelMap[] PixelMap
 		{
-            bool ok = TLN_SetLayerPixelMapping(index, map);
-            Engine.ThrowException(ok);
+            set
+            {
+                bool ok = TLN_SetLayerPixelMapping(index, value);
+                Engine.ThrowException(ok);
+            }
 		}
 
         /// <summary>
-        ///
+        /// Disables scaling and affine transformation, restoring the original pixel size
         /// </summary>
         public void Reset()
         {
@@ -1217,7 +1279,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Sets the blending mode (transparency effect)
         /// </summary>
         public Blend BlendMode
         {
@@ -1229,41 +1291,70 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Enables column offset, where each vertical column of a Tile layer can be shifted by a different amount of pixels.
+        /// <param name="offsets"/>Array of offsets to set, one position per screen column Set null to disable column offset mode</param>
         /// </summary>
-        public void SetColumnOffset(int[] offsets)
+        public int[] ColumnOffset
         {
-            bool ok = TLN_SetLayerColumnOffset(index, offsets);
+            set
+            {
+                bool ok = TLN_SetLayerColumnOffset(index, value);
+                Engine.ThrowException(ok);
+            }
+        }
+
+        /// <summary>
+        /// Enables clipping rectangle region
+        /// </summary>
+        /// <param name="x1">Left coordinate</param>
+        /// <param name="y1">Top coordinate</param>
+        /// <param name="x2">Right coordinate</param>
+        /// <param name="y2">Bottom coordinate</param>
+        /// <param name="invert">false=clip outer region, true=clip inner region</param>
+        public void SetWindow(int x1, int y1, int x2, int y2, bool invert=false)
+        {
+            bool ok = TLN_SetLayerWindow(index, x1, y1, x2, y2, invert);
             Engine.ThrowException(ok);
         }
 
         /// <summary>
-        ///
+        /// Enables solid color processing on clipped region in window layer
         /// </summary>
-		/// <param name="x1"></param>
-		/// <param name="y1"></param>
-		/// <param name="x2"></param>
-		/// <param name="y2"></param>
-		public void SetClip(int x1, int y1, int x2, int y2)
-		{
-            bool ok = TLN_SetLayerClip(index, x1, y1, x2, y2);
+        /// <param name="color">Color for the window</param>
+        /// <param name="blend">Blend mode</param>
+        /// When color is enabled on window, the area outside the clipped region gets filled with this color.
+        /// If one of blending modes is selected, color math is performed with underlying layer
+        public void SetWindowColor(Color color, Blend blend)
+        {
+            bool ok = TLN_SetLayerWindowColor(index, color.R, color.G, color.B, blend);
             Engine.ThrowException(ok);
-		}
-
-		/// <summary>
-		///
-		/// </summary>
-        public void DisableClip()
-		{
-            bool ok = TLN_DisableLayerClip(index);
-            Engine.ThrowException(ok);
-		}
+        }
 
         /// <summary>
-        ///
+        /// Disables layer window clipping
         /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <seealso cref="SetWindow"/>
+        public void DisableWindow()
+        {
+            bool ok = TLN_DisableLayerWindow(index);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Disables color processing for window
+        /// </summary>
+        /// <seealso cref="SetWindowColor"/>
+        public void DisableWindowColor()
+        {
+            bool ok = TLN_DisableLayerWindowColor(index);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Enables mosaic effect (pixelation)
+        /// </summary>
+        /// <param name="width">Vorizontal pixel size</param>
+        /// <param name="height">Vertical pixel size</param>
         public void SetMosaic(int width, int height)
         {
             bool ok = TLN_SetLayerMosaic(index, width, height);
@@ -1271,7 +1362,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Disables mosaic effect
         /// </summary>
         public void DisableMosaic()
         {
@@ -1280,11 +1371,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Gets information about the tile located in specified tilemap space
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="info"></param>
+        /// <param name="x">Horizontal position in pixels from the left border</param>
+        /// <param name="y">Vertical position in pixels from the top border</param>
+        /// <param name="info">Application-allocated TileInfo structure that will we filled with the data</param>
         public void GetTileInfo(int x, int y, out TileInfo info)
         {
             bool ok = TLN_GetLayerTile(index, x, y, out info);
@@ -1292,7 +1383,32 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Sets layer priority. If enabled, all tiles in the layer will have priority over sprites
+        /// </summary>
+        public bool Priority
+        {
+            set { TLN_SetLayerPriority(index, true); }
+        }
+
+        /// <summary>
+        /// Sets parent layer index. Use special value -1 to disable it
+        /// </summary>
+        public int ParentLayer
+        {
+            set
+            {
+                bool ok;
+
+                if (value != -1)
+                    ok = TLN_SetLayerParent(index, value);
+                else
+                    ok = TLN_DisableLayerParent(index);
+                Engine.ThrowException(ok);
+            }
+        }
+
+        /// <summary>
+        /// Sets the layer palette, overriding the one contained in the associated Bitmap or Tileset
         /// </summary>
         public Palette Palette
         {
@@ -1310,7 +1426,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Configures a Bitmap layer with the specified bitmap
         /// </summary>
         public Bitmap Bitmap
         {
@@ -1319,10 +1435,52 @@ namespace Tilengine
                 bool ok = TLN_SetLayerBitmap(index, value.ptr);
                 Engine.ThrowException(ok);
             }
+            get
+            {
+                IntPtr value = TLN_GetLayerBitmap(index);
+                Engine.ThrowException(value != IntPtr.Zero);
+                return new Bitmap(value);
+            }
         }
 
         /// <summary>
-        ///
+        /// Configures a Tile layer with the specified tilemap
+        /// </summary>
+        public Tilemap Tilemap
+        {
+            set 
+            {
+                bool ok = TLN_SetLayerTilemap(index, value.ptr);
+                Engine.ThrowException(ok);
+            }
+            get
+            {
+                IntPtr value = TLN_GetLayerTilemap(index);
+                Engine.ThrowException(value != IntPtr.Zero);
+                return new Tilemap(value);
+            }
+        }
+
+        /// <summary>
+        /// Configures a Object layer with the specified object list.
+        /// </summary>
+        public ObjectList ObjectList
+        {
+            set
+            {
+                bool ok = TLN_SetLayerObjects(index, value.ptr, IntPtr.Zero);
+                Engine.ThrowException(ok);
+            }
+            get
+            {
+                IntPtr value = TLN_GetLayerObjects(index);
+                Engine.ThrowException(value != IntPtr.Zero);
+                return new ObjectList(value);
+            }
+        }
+
+        /// <summary>
+        /// Returns layer width in pixels
         /// </summary>
         public int Width
         {
@@ -1330,7 +1488,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns layer height in pixels
         /// </summary>
         public int Height
         {
@@ -1338,12 +1496,35 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns layer horizontal position (scroll offset). Set with cref="SetPosition"/>
         /// </summary>
-        public void Disable()
+        public int X
         {
-            bool ok = TLN_DisableLayer(index);
-            Engine.ThrowException(ok);
+            get { return TLN_GetLayerX(index); }
+        }
+
+        /// <summary>
+        /// Returns layer vertical position (scroll offset). Set with cref="SetPosition"/>
+        /// </summary>
+        public int Y
+        {
+            get { return TLN_GetLayerY(index); }
+        }
+
+        /// <summary>
+        /// Enables or disables layer. If disabled, it won't be drawn
+        /// </summary>
+        public bool Enabled
+        {
+            set
+            {
+                bool ok;
+                if (value)
+                    ok = TLN_EnableLayer(index);
+                else
+                    ok = TLN_DisableLayer(index);
+                Engine.ThrowException(ok);
+            }
         }
     }
 
