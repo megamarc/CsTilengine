@@ -2265,7 +2265,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Creates a duplicate of the specified tileset and its associated palette
+        /// Creates a deep copy of the tileset
         /// </summary>
         /// <returns>A reference to the newly cloned tileset</returns>
         public Tileset Clone()
@@ -2428,7 +2428,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Creates a duplicate of the tilemap
+        /// Creates a deep copy of the tilemap
         /// </summary>
         /// <returns> Cloned tilemap object</returns>
         public Tilemap Clone()
@@ -2621,7 +2621,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Creates a duplicate of the palette
+        /// Creates a deep copy of the palette
         /// </summary>
         /// <returns>Cloned object</returns>
         public Palette Clone()
@@ -2786,7 +2786,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Creates a duplicate of the bitmap, including its pixel data and palette.
+        /// Creates a deep copy of the bitmap
         /// </summary>
         /// <returns>Cloned object</returns>
         public Bitmap Clone()
@@ -2937,7 +2937,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Creates a duplicate of the object list
+        /// Creates a deep copy of the objects list
         /// </summary>
         /// <returns>Cloned object</returns>
         public ObjectList Clone()
@@ -2981,7 +2981,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Sequence resource
+    /// Sequence resource for layer, sprite and palette animations
     /// </summary>
     public class Sequence
     {
@@ -2989,6 +2989,9 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreateSequence(string name, int target, int num_frames, SequenceFrame[] frames);
+
+        [DllImport("Tilengine")]
+        private static extern IntPtr TLN_CreateSpriteSequence(string name, IntPtr spriteset, string basename, int delay);
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreateCycle(string name, int num_strips, ColorStrip[] strips);
@@ -3005,7 +3008,7 @@ namespace Tilengine
         private static extern bool TLN_DeleteSequence(IntPtr sequence);
 
         /// <summary>
-        ///
+        /// Internal constructor for creating a Sequence from an existing resource pointer
         /// </summary>
         /// <param name="res"></param>
         internal Sequence (IntPtr res)
@@ -3014,11 +3017,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a new sequence for the tile animation engine
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="target"></param>
-        /// <param name="frames"></param>
+        /// <param name="name">String with an unique name to query later</param>
+        /// <param name="target">For tileset animations, the tile index to animate</param>
+        /// <param name="frames">Array of SequenceFrame structures, one for each keyframe</param>
         public Sequence(string name, int target, SequenceFrame[] frames)
         {
             IntPtr retval = TLN_CreateSequence(name, target, frames.Length, frames);
@@ -3027,10 +3030,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a color cycle sequence for palette animation
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="strips"></param>
+        /// <param name="name">String with an unique name to query later</param>
+        /// <param name="strips">Array of ColorStrip structures, one for each color strip</param>
         public Sequence(string name, ColorStrip[] strips)
         {
             IntPtr retval = TLN_CreateCycle(name, strips.Length, strips);
@@ -3039,7 +3042,21 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Creates a name-based spriteset sequence for sprite animation
+        /// </summary>
+        /// <param name="name">String with an unique name to query later</param>
+        /// <param name="spriteset">Spriteset with the animation frames</param>
+        /// <param name="basename">Base of the sprite name for the numbered sequence</param>
+        /// <param name="delay">Number of ticks to delay between frames</param>
+        public Sequence(string name, Spriteset spriteset, string basename, int delay)
+        {
+            IntPtr retval = TLN_CreateSpriteSequence(name, spriteset.ptr, basename, delay);
+            Engine.ThrowException(retval != IntPtr.Zero);
+            ptr = retval;
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the sequence
         /// </summary>
         /// <returns></returns>
         public Sequence Clone()
@@ -3050,9 +3067,9 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns information about the sequence
         /// </summary>
-        /// <param name="info"></param>
+        /// <param name="info">Appliaction-allocated SequenceInfo structure that will receive the data</param>
         public void GetInfo(out SequenceInfo info)
         {
             bool ok = TLN_GetSequenceInfo(ptr, out info);
@@ -3060,7 +3077,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Deletes sequence and releases used memory
         /// </summary>
         public void Delete()
         {
@@ -3071,7 +3088,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// SequencePack resource
+    /// SequencePack resource, container for Sequence objects
     /// </summary>
     public class SequencePack
     {
@@ -3101,7 +3118,7 @@ namespace Tilengine
         private static extern bool TLN_DeleteSequencePack(IntPtr sp);
 
         /// <summary>
-        ///
+        /// Internal constructor for creating a SequencePack from an existing resource pointer
         /// </summary>
         /// <param name="res"></param>
         internal SequencePack (IntPtr res)
@@ -3110,10 +3127,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Loads a sqx file containing one or more sequences
         /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
+        /// <param name="filename">Path to sqx file with sequence descriptions</param>
+        /// <returns>Created sequence pack</returns>
         public static SequencePack FromFile(string filename)
         {
             IntPtr retval = TLN_LoadSequencePack(filename);
@@ -3122,7 +3139,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the number of sequences in the pack
         /// </summary>
         public int NumSequences
         {
@@ -3130,11 +3147,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the sequence inside a sequence pack that matches with the given name
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">Name of the sequence to find</param>
         /// <returns></returns>
-        public Sequence Find(string name)
+        public Sequence GetSequence(string name)
         {
             IntPtr retval = TLN_FindSequence(ptr, name);
             Engine.ThrowException(retval != IntPtr.Zero);
@@ -3142,11 +3159,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Returns the sequence inside a sequence pack that has the index specified.
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">Zero-based index of the sequence to find</param>
         /// <returns></returns>
-        public Sequence Get(int index)
+        public Sequence GetSequence(int index)
         {
             IntPtr retval = TLN_GetSequence(ptr, index);
             Engine.ThrowException(retval != IntPtr.Zero);
@@ -3154,9 +3171,9 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Adds a sequence to a sequence pack
         /// </summary>
-        /// <param name="sequence"></param>
+        /// <param name="sequence">Sequence to add to the pack</param>
         public void Add(Sequence sequence)
         {
             bool ok = TLN_AddSequenceToPack(ptr, sequence.ptr);
@@ -3164,7 +3181,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Deletes sequence pack and releases used memory
         /// </summary>
         public void Delete()
         {
