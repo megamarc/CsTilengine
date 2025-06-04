@@ -149,7 +149,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// List of flags for tiles and sprites
+    /// List of flags for sprites
     /// </summary>
     public enum TileFlags
     {
@@ -158,9 +158,20 @@ namespace Tilengine
         FlipY       = (1 << 14),    // vertical flip
         Rotate      = (1 << 13),    // row/column flip (only for tiles)
         Priority    = (1 << 12),    // tile goes in front of sprite layer
-        Masked      = (1 << 11),    // sprite won't be drawn inside masked region
         Tileset     = (15 << 7),    // tileset index (0 - 15)
         Palette     = (7 << 4),     // palette index (0 - 7)
+    }
+
+    /// <summary>
+    /// List of flags for tiles
+    /// </summary>
+    public enum SpriteFlags
+    {
+        None        = (0),          // no flags
+        FlipX       = (1 << 15),    // horizontal flip
+        FlipY       = (1 << 14),    // vertical flip
+        Priority    = (1 << 12),    // tile goes in front of sprite layer
+        Masked      = (1 << 11),    // sprite won't be drawn inside masked region
     }
 
     /// <summary>
@@ -266,7 +277,7 @@ namespace Tilengine
 		public int Y;                   // Screen position y
 		public int W;                   // Actual width in screen (after scaling)
 		public int H;                   // Actual height in screen (after scaling)
-		public uint Flags;              // flags
+		public SpriteFlags Flags;       // flags
 		public IntPtr Palette;          // Native palette reference
 		public IntPtr Spriteset;        // Native spriteset reference
 		public int Index;               // Graphic index inside spriteset
@@ -1537,7 +1548,7 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_ConfigSprite(int nsprite, IntPtr spriteset, TileFlags flags);
+        private static extern bool TLN_ConfigSprite(int nsprite, IntPtr spriteset, SpriteFlags flags);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1545,7 +1556,15 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_SetSpriteFlags(int nsprite, TileFlags flags);
+        private static extern bool TLN_SetSpriteFlags(int nsprite, SpriteFlags flags);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_EnableSpriteFlag(int nsprite, uint flag, bool enable);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_SetSpritePivot(int nsprite, float px, float py);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -1574,6 +1593,12 @@ namespace Tilengine
         [DllImport("Tilengine")]
         private static extern int TLN_GetSpritePicture(int nsprite);
 
+        [DllImport("Tilengine")] 
+        private static extern int TLN_GetSpriteX(int nsprite);
+
+        [DllImport("Tilengine")] 
+        private static extern int TLN_GetSpriteY(int nsprite);
+
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
         private static extern bool TLN_EnableSpriteCollision(int nsprite, [MarshalAsAttribute(UnmanagedType.I1)] bool enable);
@@ -1584,48 +1609,75 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_GetSpriteState(int nsprite, out SpriteState state);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_SetFirstSprite(int nsprite);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_SetNextSprite(int nsprite, int next);
+
+        [DllImport("Tilengine")]
+        public static extern void TLN_SetSpritesMaskRegion(int top_line, int bottom_line);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_SetSpriteAnimation(int nsprite, IntPtr sequence, int loop);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_DisableSpriteAnimation(int nsprite);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_PauseSpriteAnimation(int index);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        public static extern bool TLN_ResumeSpriteAnimation(int index);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
         private static extern bool TLN_DisableSprite(int nsprite);
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_GetSpritePalette(int nsprite);
 
         /// <summary>
-        ///
+        /// Configures a sprite, setting spriteset and flags at once
         /// </summary>
-        /// <param name="spriteset"></param>
-        /// <param name="flags"></param>
-        public void Setup(Spriteset spriteset, TileFlags flags)
+        /// <param name="spriteset">Spriteset for the sprite</param>
+        /// <param name="flags">Combination of SpriteFlags</param>
+        public void Setup(Spriteset spriteset, SpriteFlags flags)
         {
             bool ok = TLN_ConfigSprite(index, spriteset.ptr, flags);
             Engine.ThrowException(ok);
         }
 
         /// <summary>
-        ///
+        /// Assigns the spriteset to the sprite.
+        /// <param name="spriteset">Spriteset to assign</param>
         /// </summary>
-        public Spriteset Spriteset
+        public void SetSpriteset(Spriteset spriteset)
         {
-            set
-            {
-                bool ok = TLN_SetSpriteSet(index, value.ptr);
-                Engine.ThrowException(ok);
-            }
+            bool ok = TLN_SetSpriteSet(index, spriteset.ptr);
+            Engine.ThrowException(ok);
         }
 
         /// <summary>
-        ///
+        /// Sets the combination of flags for the sprite
+        /// <param name="flags">Combination of SpriteFlags</param>
         /// </summary>
-        public TileFlags Flags
+        public void SetFlags(SpriteFlags flags)
         {
-            set
-            {
-                bool ok = TLN_SetSpriteFlags(index, value);
-                Engine.ThrowException(ok);
-            }
+            bool ok = TLN_SetSpriteFlags(index, flags);
+            Engine.ThrowException(ok);
         }
 
         /// <summary>
-        ///
+        /// Sets/gets the actual graphic index inside the spriteset for the sprite
         /// </summary>
         public int Picture
         {
@@ -1643,7 +1695,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Sets/gets the sprite palette, overriding the one defined in the associated spriteset
         /// </summary>
         public Palette Palette
         {
@@ -1655,16 +1707,47 @@ namespace Tilengine
             get
             {
                 IntPtr value = TLN_GetSpritePalette(index);
-                Engine.ThrowException(value != IntPtr.Zero);
-                return new Palette(value);
+                return value != IntPtr.Zero ? new Palette(value) : null;
             }
         }
 
         /// <summary>
-        ///
+        /// Enables (activates) a combination of SpriteFlags for the sprite.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
+        /// <param name="flag">Combination of SpriteFlags to enable</param>
+        public void EnableFlag(uint flag)
+        {
+            bool ok = TLN_EnableSpriteFlag(index, flag, true);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Disables (deactivates) a combination of SpriteFlags for the sprite.
+        /// </summary>
+        /// <param name="flag">Combination of SpriteFlags to disable</param>
+        public void DisableFlag(uint flag)
+        {
+            bool ok = TLN_EnableSpriteFlag(index, flag, false);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Sets the pivot point of the sprite, which is the point around which it is placed and scaled. By default is 0.0 (top-left corner of the sprite).
+        /// </summary>
+        /// <param name="x">horizontal normalized value (0.0 = full left, 1.0 = full right)</param>
+        /// <param name="y">vertical normalized value (0.0 = full top, 1.0 = full bottom)</param>
+        /// <remarks>Sprite pivot is reset automatically to default position after changing the spriteset</remarks>
+        public void SetPivot(float x, float y)
+        {
+            bool ok = TLN_SetSpritePivot(index, x, y);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Sets the sprite position in screen space, or in world space if World mode is active and the spite is attached to it
+        /// </summary>
+        /// <param name="x">Horizontal position in pixels of the pivot point</param>
+        /// <param name="y">Vertical position in pixels of the pivot point</param>
         public void SetPosition(int x, int y)
         {
             bool ok = TLN_SetSpritePosition(index, x, y);
@@ -1672,10 +1755,26 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Read-only property that returns the horizontal position of the sprite in pixels from the left border of the screen.
         /// </summary>
-        /// <param name="sx"></param>
-        /// <param name="sy"></param>
+        public int X
+        {
+            get { return TLN_GetSpriteX(index); }
+        }
+
+        /// <summary>
+        /// Read-only property that rturns the vertical position of the sprite in pixels from the top border of the screen.
+        /// </summary>
+        public int Y
+        {
+            get { return TLN_GetSpriteY(index); }
+        }
+
+        /// <summary>
+        /// Sets the scaling factor of the sprite. 1.0 means no scaling, values below 1.0 will shrink the sprite and values above 1.0 will enlarge it.
+        /// </summary>
+        /// <param name="sx">Horizontal scale factor</param>
+        /// <param name="sy">Vertical scale factor</param>
         public void SetScaling(float sx, float sy)
         {
             bool ok = TLN_SetSpriteScaling(index, sx, sy);
@@ -1683,9 +1782,9 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Disables scaling transformation, restoring the original pixel size of the sprite.
         /// </summary>
-        public void Reset()
+        public void DisableScaling()
         {
             bool ok = TLN_ResetSpriteScaling(index);
             Engine.ThrowException(ok);
@@ -1694,27 +1793,33 @@ namespace Tilengine
         /// <summary>
         /// Sets blending mode
         /// </summary>
-        public Blend BlendMode
+        /// <param name="mode">Blend mode to set</param>
+        public void SetBlendMode(Blend mode)
         {
-            set
-            {
-                bool ok = TLN_SetSpriteBlendMode(index, value, 0);
-                Engine.ThrowException(ok);
-            }
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="mode"></param>
-        public void EnableCollision(bool mode)
-        {
-            bool ok = TLN_EnableSpriteCollision(index, mode);
+            bool ok = TLN_SetSpriteBlendMode(index, mode, 0);
             Engine.ThrowException(ok);
         }
 
         /// <summary>
-        ///
+        /// Enable sprite collision checking at pixel level
+        /// </summary>
+        public void EnableCollisions()
+        {
+            bool ok = TLN_EnableSpriteCollision(index, true);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Enable sprite collision checking at pixel level
+        /// </summary>
+        public void DisableCollisions()
+        {
+            bool ok = TLN_EnableSpriteCollision(index, false);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Returns true if the sprite si involved in a collision with another sprite at pixel level.
         /// </summary>
         public bool Collision
         {
@@ -1722,7 +1827,84 @@ namespace Tilengine
         }
 
         /// <summary>
-        ///
+        /// Gets the current state of the sprite, which includes its position, picture, palette, flags and other properties.
+        /// </summary>
+        /// <param name="state">Application-allocated SpriteState structure that will receive the data</param>
+        public void GetState(out SpriteState state)
+        {
+            bool ok = TLN_GetSpriteState(index, out state);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Sets this the first sprite to drawn in sequence (beginning of list)
+        /// </summary>
+        public void SetFirst()
+        {
+            bool ok = TLN_SetFirstSprite(index);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Sets the index of next sprite to draw after this one, building the list
+        /// </summary>
+        /// <param name="next">Index of the next sprite to dtaw after this</param>
+        public void SetNext(int next)
+        {
+            bool ok = TLN_SetNextSprite(index, next);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Static method for all spites. Define the exclusion region for sprites that have SpriteFlags.Masked flag set
+        /// </summary>
+        /// <param name="top">Top scanline of the esxclusion region</param>
+        /// <param name="bottom">Bottom line of the exclusion region</param>
+        public static void SetMaskRegion(int top, int bottom)
+        {
+            TLN_SetSpritesMaskRegion(top, bottom);
+        }
+
+        /// <summary>
+        /// Starts a sprite animation
+        /// </summary>
+        /// <param name="sequence">Sequence object with the animation definition</param>
+        /// <param name="loop">number of times to loop, 0=infinite</param>
+        public void SetAnimation(Sequence sequence, int loop)
+        {
+            bool ok = TLN_SetSpriteAnimation(index, sequence.ptr, loop);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Disables sprite animation, if it was previously set with SetAnimation.
+        /// </summary>
+        public void DisableAnimation()
+        {
+            bool ok = TLN_DisableSpriteAnimation(index);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Pauses the animation effect. Resume with ResumeAnimation.
+        /// </summary>
+        public void PauseAnimation(bool pause)
+        {
+            bool ok = TLN_PauseSpriteAnimation(index);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Resumes the animation previously paused with PauseAnimation.
+        /// </summary>
+        public void ResumeAnimation(bool pause)
+        {
+            bool ok = TLN_ResumeSpriteAnimation(index);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Disables the sprite and returns it to the pool of available sprites
         /// </summary>
         public void Disable()
         {
