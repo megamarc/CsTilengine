@@ -496,6 +496,16 @@ namespace Tilengine
 		[DllImport("Tilengine")]
 		private static extern void TLN_CloseResourcePack();
 
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_LoadWorld(string tmxfile, int first_layer);
+
+        [DllImport("Tilengine")]
+        private static extern void TLN_SetWorldPosition(int x, int y);
+
+        [DllImport("Tilengine")]
+        private static extern void TLN_ReleaseWorld();
+
         private Engine (int hres, int vres, int numLayers, int numSprites, int numAnimations)
         {
             int c;
@@ -777,10 +787,36 @@ namespace Tilengine
         /// </summary>
         LogValue LogLevel
         {
-            set
-            {
-                TLN_SetLogLevel((int)value);
-            }
+            set { TLN_SetLogLevel((int)value); }
+        }
+
+        /// <summary>
+        /// Opens a whole tmx file and enables world mode, where layers move according their parallax factor and sprites are given world coordinates instead of screen coordinates.
+        /// </summary>
+        /// <param name="tmxfile">TMX file to load</param>
+        /// <param name="first_layer">Index of the first layer to place layers read from the file</param>
+        void OpenWorld(string tmxfile, int first_layer = 0)
+        {
+            bool ok = TLN_LoadWorld(tmxfile, first_layer);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Sets the world position, that is the top-left corner of the screen in world coordinates. All layers and attached sprites are moved accordingly. Requires world mode to be enabled with OpenWorld() method.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        void SetPosition(int x, int y)
+        {
+            TLN_SetWorldPosition(x, y);
+        }
+
+        /// <summary>
+        /// Disables world mode and returns to normal screen coordinates. Releases used memory by the tmx file
+        /// </summary>
+        void CloseWorld()
+        {
+            TLN_ReleaseWorld();
         }
     }
 
@@ -1203,6 +1239,10 @@ namespace Tilengine
         [DllImport("Tilengine")] 
         private static extern int TLN_GetLayerY(int nlayer);
 
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_SetLayerParallaxFactor(int nlayer, float x, float y);
+
         /// <summary>
         /// Set up a Tile layer with explicit Tileset and Tilemap
         /// </summary>
@@ -1537,6 +1577,17 @@ namespace Tilengine
                 Engine.ThrowException(ok);
             }
         }
+
+        /// <summary>
+        /// Overrides the default layer parallax factor, which is used to calculate the position of the layer in world coordinates when world mode is enabled (see Engine.OpenWorld)
+        /// </summary>
+        /// <param name="x">Horizontal parallax factor (1.0 means 1:1 pixel/world ratio)</param>
+        /// <param name="y">Horizontal parallax factor</param>
+        public void SetParallaxFactor(float px, float py)
+        {
+            bool ok = TLN_SetLayerParallaxFactor(index, px, py);
+            Engine.ThrowException(ok);
+        }
     }
 
     /// <summary>
@@ -1645,6 +1696,10 @@ namespace Tilengine
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_GetSpritePalette(int nsprite);
 
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_SetSpriteWorldPosition(int nsprite, int x, int y);
+
         /// <summary>
         /// Configures a sprite, setting spriteset and flags at once
         /// </summary>
@@ -1744,11 +1799,22 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Sets the sprite position in screen space, or in world space if World mode is active and the spite is attached to it
+        /// Sets the sprite position in screen space
         /// </summary>
-        /// <param name="x">Horizontal position in pixels of the pivot point</param>
-        /// <param name="y">Vertical position in pixels of the pivot point</param>
+        /// <param name="x">Horizontal position in pixels of the pivot point in screen</param>
+        /// <param name="y">Vertical position in pixels of the pivot point in screen</param>
         public void SetPosition(int x, int y)
+        {
+            bool ok = TLN_SetSpritePosition(index, x, y);
+            Engine.ThrowException(ok);
+        }
+
+        /// <summary>
+        /// Sets the sprite position in world space, if world mode is active
+        /// </summary>
+        /// <param name="x">Horizontal position in pixels of the pivot point in world space</param>
+        /// <param name="y">Vertical position in pixels of the pivot point in world space</param>
+        public void SetWorldPosition(int x, int y)
         {
             bool ok = TLN_SetSpritePosition(index, x, y);
             Engine.ThrowException(ok);
