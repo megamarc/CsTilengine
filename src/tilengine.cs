@@ -28,9 +28,7 @@ SOFTWARE.
 */
 
 using System;
-using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
 
 namespace Tilengine
 {
@@ -190,7 +188,7 @@ namespace Tilengine
     /// <summary>
     /// Trace levels
     /// </summary>
-    public enum LogValue
+    public enum LogLevel
     {
         None,       // Don't print anything (default)
         Errors,     // Print only runtime errors
@@ -565,6 +563,14 @@ namespace Tilengine
         }
 
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Engine()
+        {
+            Dispose();
+        }
+
+        /// <summary>
         /// Returns the number of objets used by the engine so far
         /// </summary>
         public uint NumObjects
@@ -791,7 +797,7 @@ namespace Tilengine
         /// <summary>
         /// Verbosity of trace messages
         /// </summary>
-        void SetLogLevel(LogValue value)
+        public void SetLogLevel(LogLevel value)
         {
             TLN_SetLogLevel((int)value);
         }
@@ -801,7 +807,7 @@ namespace Tilengine
         /// </summary>
         /// <param name="tmxfile">TMX file to load</param>
         /// <param name="first_layer">Index of the first layer to place layers read from the file</param>
-        void OpenWorld(string tmxfile, int first_layer = 0)
+        public void OpenWorld(string tmxfile, int first_layer = 0)
         {
             bool ok = TLN_LoadWorld(tmxfile, first_layer);
             Engine.ThrowException(ok);
@@ -812,7 +818,7 @@ namespace Tilengine
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        void SetPosition(int x, int y)
+        public void SetPosition(int x, int y)
         {
             TLN_SetWorldPosition(x, y);
         }
@@ -820,7 +826,7 @@ namespace Tilengine
         /// <summary>
         /// Disables world mode and returns to normal screen coordinates. Releases used memory by the tmx file
         /// </summary>
-        void CloseWorld()
+        public void CloseWorld()
         {
             TLN_ReleaseWorld();
         }
@@ -1111,6 +1117,14 @@ namespace Tilengine
             if (instance != null)
                 TLN_DeleteWindow();
             instance = null;
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Window()
+        {
+            Dispose();
         }
     }
 
@@ -2055,6 +2069,7 @@ namespace Tilengine
     public class Spriteset : ICloneable, IDisposable
     {
         internal IntPtr ptr;
+        bool owned;
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreateSpriteset(IntPtr bitmap, SpriteData[] rects, int entries);
@@ -2094,10 +2109,10 @@ namespace Tilengine
         /// <summary>
         /// Internal constructor
         /// </summary>
-        /// <param name="res"></param>
-        internal Spriteset (IntPtr res)
+        internal Spriteset (IntPtr res, bool owned = false)
         {
             ptr = res;
+            this.owned = owned;
         }
 
         /// <summary>
@@ -2110,6 +2125,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreateSpriteset(bitmap.ptr, data, data.Length);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -2124,7 +2140,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_LoadSpriteset (filename);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Spriteset (retval);
+            return new Spriteset(retval, true);
         }
 
         /// <summary>
@@ -2135,7 +2151,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_CloneSpriteset(ptr);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Spriteset(retval);
+            return new Spriteset(retval, true);
         }
 
         /// <summary>
@@ -2179,12 +2195,20 @@ namespace Tilengine
         /// </summary>
         public void Dispose ()
         {
-            if (ptr != IntPtr.Zero)
+            if (owned && ptr != IntPtr.Zero)
             {
                 bool ok = TLN_DeleteSpriteset (ptr);
                 Engine.ThrowException(ok);
                 ptr = IntPtr.Zero;
             }
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Spriteset()
+        {
+            Dispose();
         }
     }
 
@@ -2194,6 +2218,7 @@ namespace Tilengine
     public class Tileset : ICloneable, IDisposable
     {
         internal IntPtr ptr;
+        bool owned;
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreateTileset(int numtiles, int width, int height, IntPtr palette, IntPtr sequencepack, TileAttributes[] attributes);
@@ -2273,10 +2298,10 @@ namespace Tilengine
         /// <summary>
         /// Internal constructor
         /// </summary>
-        /// <param name="res"></param>
-        internal Tileset (IntPtr res)
+        internal Tileset (IntPtr res, bool owned = false)
         {
             ptr = res;
+            this.owned = owned;
         }
 
         /// <summary>
@@ -2293,6 +2318,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreateTileset(numTiles, width, height, palette.ptr, sp.ptr != null ? sp.ptr : IntPtr.Zero, attributes);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -2305,14 +2331,14 @@ namespace Tilengine
         {
             IntPtr retval = TLN_LoadTileset(filename);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Tileset(retval);
+            return new Tileset(retval, true);
         }
 
         public static Tileset FromImages(int numTiles, TileImage[] images)
         {
             IntPtr retval = TLN_CreateImageTileset(numTiles, images);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Tileset(retval);
+            return new Tileset(retval, true);
         }
 
         /// <summary>
@@ -2323,7 +2349,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_CloneTileset(ptr);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Tileset(retval);
+            return new Tileset(retval, true);
         }
 
         /// <summary>
@@ -2344,12 +2370,20 @@ namespace Tilengine
         /// </summary>
         public void Dispose()
         {
-            if (ptr != IntPtr.Zero)
+            if (owned && ptr != IntPtr.Zero)
             {
                 bool ok = TLN_DeleteTileset(ptr);
                 Engine.ThrowException(ok);
                 ptr = IntPtr.Zero;
             }
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Tileset()
+        {
+            Dispose();
         }
     }
 
@@ -2359,6 +2393,7 @@ namespace Tilengine
     public class Tilemap : ICloneable, IDisposable
     {
         internal IntPtr ptr;
+        bool owned;
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreateTilemap(int rows, int cols, Tile[] tiles, uint bgcolor, IntPtr tileset);
@@ -2433,10 +2468,10 @@ namespace Tilengine
         /// <summary>
         /// Intrernal constructor
         /// </summary>
-        /// <param name="res"></param>
-        internal Tilemap (IntPtr res)
+        internal Tilemap (IntPtr res, bool owned = false)
         {
             ptr = res;
+            this.owned = owned;
         }
 
         /// <summary>
@@ -2455,6 +2490,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreateTilemap(rows, cols, tiles, (uint)color, tileset != null? tileset.ptr : IntPtr.Zero);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -2467,7 +2503,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_LoadTilemap(filename, layername);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Tilemap(retval);
+            return new Tilemap(retval, true);
         }
 
         /// <summary>
@@ -2478,7 +2514,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_CloneTilemap(ptr);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Tilemap(retval);
+            return new Tilemap(retval, true);
         }
 
         /// <summary>
@@ -2550,12 +2586,20 @@ namespace Tilengine
         /// </summary>
         public void Dispose()
         {
-            if (ptr != IntPtr.Zero)
+            if (owned && ptr != IntPtr.Zero)
             {
                 bool ok = TLN_DeleteTilemap(ptr);
                 Engine.ThrowException(ok);
                 ptr = IntPtr.Zero;
             }
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Tilemap()
+        {
+            Dispose();
         }
     }
 
@@ -2565,6 +2609,7 @@ namespace Tilengine
     public class Palette : ICloneable, IDisposable
     {
         internal IntPtr ptr;
+        bool owned;
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreatePalette(int entries);
@@ -2616,10 +2661,10 @@ namespace Tilengine
         /// <summary>
         /// Internal constructor for creating a Palette from an existing resource pointer
         /// </summary>
-        /// <param name="res"></param>
-        internal Palette (IntPtr res)
+        internal Palette (IntPtr res, bool owned = false)
         {
             ptr = res;
+            this.owned = owned;
         }
 
         /// <summary>
@@ -2631,6 +2676,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreatePalette(entries);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -2642,7 +2688,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_LoadPalette(filename);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Palette(retval);
+            return new Palette(retval, true);
         }
 
         /// <summary>
@@ -2653,7 +2699,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_ClonePalette(ptr);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Palette(retval);
+            return new Palette(retval, true);
         }
 
         /// <summary>
@@ -2720,12 +2766,20 @@ namespace Tilengine
         /// </summary>
         public void Dispose()
         {
-            if (ptr != IntPtr.Zero)
+            if (owned && ptr != IntPtr.Zero)
             {
                 bool ok = TLN_DeletePalette(ptr);
                 Engine.ThrowException(ok);
                 ptr = IntPtr.Zero;
             }
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Palette()
+        {
+            Dispose();
         }
     }
 
@@ -2735,6 +2789,7 @@ namespace Tilengine
     public class Bitmap : ICloneable, IDisposable
     {
         internal IntPtr ptr;
+        bool owned;
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreateBitmap(int width, int height, int bpp);
@@ -2840,10 +2895,10 @@ namespace Tilengine
         /// <summary>
         /// Internal constructor for creating a Bitmap from an existing resource pointer
         /// </summary>
-        /// <param name="res"></param>
-        internal Bitmap(IntPtr res)
+        internal Bitmap(IntPtr res, bool owned = false)
         {
             ptr = res;
+            this.owned = owned;
         }
 
         /// <summary>
@@ -2857,6 +2912,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreateBitmap(width, height, bpp);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -2868,7 +2924,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_LoadBitmap(filename);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Bitmap(retval);
+            return new Bitmap(retval, true);
         }
 
         /// <summary>
@@ -2879,7 +2935,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_CloneBitmap(ptr);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Bitmap(retval);
+            return new Bitmap(retval, true);
         }
 
         /// <summary>
@@ -2887,9 +2943,20 @@ namespace Tilengine
         /// </summary>
         public void Dispose()
         {
-            bool ok = TLN_DeleteBitmap(ptr);
-            Engine.ThrowException(ok);
-            ptr = IntPtr.Zero;
+            if (owned && ptr != IntPtr.Zero)
+            {
+                bool ok = TLN_DeleteBitmap(ptr);
+                Engine.ThrowException(ok);
+                ptr = IntPtr.Zero;
+            }
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Bitmap()
+        {
+            Dispose();
         }
     }
 
@@ -2899,6 +2966,7 @@ namespace Tilengine
     public class ObjectList : ICloneable, IDisposable
     {
         internal IntPtr ptr;
+        bool owned;
 
         [DllImport("Tilengine")] 
         private static extern IntPtr TLN_CreateObjectList();
@@ -2936,10 +3004,10 @@ namespace Tilengine
         /// <summary>
         /// Internal constructor for creating an ObjectList from an existing resource pointer
         /// </summary>
-        /// <param name="res"></param>
-        internal ObjectList(IntPtr res)
+        internal ObjectList(IntPtr res, bool owned = false)
         {
             ptr = res;
+            this.owned = owned;
         }
 
         /// <summary>
@@ -2950,6 +3018,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreateObjectList();
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -2962,7 +3031,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_LoadObjectList(filename, layername);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new ObjectList(retval);
+            return new ObjectList(retval, true);
         }
 
         /// <summary>
@@ -2973,7 +3042,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_CloneObjectList(ptr);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new ObjectList(retval);
+            return new ObjectList(retval, true);
         }
 
         /// <summary>
@@ -2995,12 +3064,20 @@ namespace Tilengine
         /// </summary>
         public void Dispose()
         {
-            if (ptr != IntPtr.Zero)
+            if (owned && ptr != IntPtr.Zero)
             {
                 bool ok = TLN_DeleteObjectList(ptr);
                 Engine.ThrowException(ok);
                 ptr = IntPtr.Zero;
             }
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~ObjectList()
+        {
+            Dispose();
         }
     }
 
@@ -3010,6 +3087,7 @@ namespace Tilengine
     public class Sequence : ICloneable, IDisposable
     {
         internal IntPtr ptr;
+        bool owned;
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreateSequence(string name, int target, int num_frames, SequenceFrame[] frames);
@@ -3035,9 +3113,10 @@ namespace Tilengine
         /// Internal constructor for creating a Sequence from an existing resource pointer
         /// </summary>
         /// <param name="res"></param>
-        internal Sequence (IntPtr res)
+        internal Sequence (IntPtr res, bool owned = false)
         {
             ptr = res;
+            this.owned = owned;
         }
 
         /// <summary>
@@ -3051,6 +3130,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreateSequence(name, target, frames.Length, frames);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -3063,6 +3143,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreateCycle(name, strips.Length, strips);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -3077,6 +3158,7 @@ namespace Tilengine
             IntPtr retval = TLN_CreateSpriteSequence(name, spriteset.ptr, basename, delay);
             Engine.ThrowException(retval != IntPtr.Zero);
             ptr = retval;
+            owned = true;
         }
 
         /// <summary>
@@ -3087,7 +3169,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_CloneSequence(ptr);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new Sequence(retval);
+            return new Sequence(retval, true);
         }
 
         /// <summary>
@@ -3105,12 +3187,20 @@ namespace Tilengine
         /// </summary>
         public void Dispose()
         {
-            if (ptr != IntPtr.Zero)
+            if (owned && ptr != IntPtr.Zero)
             {
                 bool ok = TLN_DeleteSequence(ptr);
                 Engine.ThrowException(ok);
                 ptr = IntPtr.Zero;
             }
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Sequence()
+        {
+            Dispose();
         }
     }
 
@@ -3120,6 +3210,7 @@ namespace Tilengine
     public class SequencePack : IDisposable
     {
         internal IntPtr ptr;
+        bool owned;
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_CreateSequencePack();
@@ -3147,10 +3238,10 @@ namespace Tilengine
         /// <summary>
         /// Internal constructor for creating a SequencePack from an existing resource pointer
         /// </summary>
-        /// <param name="res"></param>
-        internal SequencePack (IntPtr res)
+        internal SequencePack (IntPtr res, bool owned = false)
         {
             ptr = res;
+            this.owned = owned;
         }
 
         /// <summary>
@@ -3162,7 +3253,7 @@ namespace Tilengine
         {
             IntPtr retval = TLN_LoadSequencePack(filename);
             Engine.ThrowException(retval != IntPtr.Zero);
-            return new SequencePack(retval);
+            return new SequencePack(retval, true);
         }
 
         /// <summary>
@@ -3212,12 +3303,20 @@ namespace Tilengine
         /// </summary>
         public void Dispose()
         {
-            if (ptr != IntPtr.Zero)
+            if (owned && ptr != IntPtr.Zero)
             {
                 bool ok = TLN_DeleteSequencePack(ptr);
                 Engine.ThrowException(ok);
                 ptr = IntPtr.Zero;
             }
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~SequencePack()
+        {
+            Dispose();
         }
     }
 }
