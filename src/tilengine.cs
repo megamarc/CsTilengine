@@ -157,8 +157,8 @@ namespace Tilengine
         None        = (0),          // no flags
         FlipX       = (1 << 15),    // horizontal flip
         FlipY       = (1 << 14),    // vertical flip
-        Rotate      = (1 << 13),    // row/column flip (only for tiles)
-        Priority    = (1 << 12),    // tile goes in front of sprite layer
+        Rotate      = (1 << 13),    // transposes 90º
+        Priority    = (1 << 12),    // tile goes in front of regular sprites
         Tileset     = (15 << 7),    // tileset index (0 - 15)
         Palette     = (7 << 4),     // palette index (0 - 7)
     }
@@ -171,7 +171,8 @@ namespace Tilengine
         None        = (0),          // no flags
         FlipX       = (1 << 15),    // horizontal flip
         FlipY       = (1 << 14),    // vertical flip
-        Priority    = (1 << 12),    // tile goes in front of sprite layer
+        Rotate      = (1 << 13),    // transposes 90º (only for square sprites)
+        Priority    = (1 << 12),    // sprite goes in front of priority tiles
         Masked      = (1 << 11),    // sprite won't be drawn inside masked region
     }
 
@@ -956,16 +957,15 @@ namespace Tilengine
         /// <summary>
         /// Creates a window for rendering
         /// </summary>
-        /// <param name="overlay">Optional path of a bmp file to overlay (for emulating RGB mask, scanlines, etc)</param>
         /// <param name="flags">Combined mask of the possible creation flags</param>
         /// <returns>Window instance</returns>
         /// <remarks>This is a singleton object: calling Init multiple times will return the same reference</remarks>
-        public static Window Create(string overlay, WindowFlags flags)
+        public static Window Create(WindowFlags flags)
         {
             // singleton
             if (instance == null)
             {
-                bool retval = TLN_CreateWindow (overlay, flags);
+                bool retval = TLN_CreateWindow (null, flags);
                 Engine.ThrowException(retval);
                 instance = new Window();
             }
@@ -1064,11 +1064,10 @@ namespace Tilengine
         /// <summary>
         /// Draws a frame to the window
         /// </summary>
-        /// <param name="time">Timestamp value</param>
         /// <remarks>This method does delegate-driven rendering</remarks>
-        public void DrawFrame(int time)
+        public void DrawFrame()
         {
-            TLN_DrawFrame(time);
+            TLN_DrawFrame(0);
         }
 
         /// <summary>
@@ -2464,7 +2463,7 @@ namespace Tilengine
         /// <param name="filename">TMX file with the tilemap</param>
         /// <param name="layername">Optional name of the layer inside the tmx file to load. null to load the first layer</param>
         /// <returns></returns>
-        public static Tilemap FromFile(string filename, string layername)
+        public static Tilemap FromFile(string filename, string layername=null)
         {
             IntPtr retval = TLN_LoadTilemap(filename, layername);
             Engine.ThrowException(retval != IntPtr.Zero);
