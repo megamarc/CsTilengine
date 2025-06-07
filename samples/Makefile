@@ -1,8 +1,8 @@
 test: test.cs
-	mcs test.cs ../src/tilengine.cs -out:test
+	mcs test.cs ../src/Tilengine.cs -out:test
 
 platformer: platformer.cs
-	mcs platformer.cs ../src/tilengine.cs -out:platformer
+	mcs platformer.cs ../src/Tilengine.cs -out:platformer
 
 all: test platformer
 

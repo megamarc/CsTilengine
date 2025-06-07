@@ -12,7 +12,7 @@ CsTilengine is the C#/NET/Mono binding for Tilengine. It is not a direct 1:1 API
 Tilengine native shared library must be installed separately. Please refer to https://github.com/megamarc/Tilengine about how to do it.
 
 ### Windows
-.NET Framework 2.0 or later must be installed
+.NET Framework must be installed
 
 ### Linux/OSX
 Mono tools and runtime must be installed. In Debian-based distros please execute the following command:
@@ -21,7 +21,7 @@ sudo apt-get install mono-mcs
 ```
 
 ## Installation
-No install step is required. Just make sure that the Tilengine library and the `tilengine.cs` modules are accessible from within your own project
+No install step is required. Just make sure that the Tilengine library and the `Tilengine.cs` modules are accessible from within your own project
 
 ## Basic program
 The following program does these actions:
@@ -37,20 +37,17 @@ Source code:
 ```csharp
 using Tilengine;
 
-class test{
-	static int Main(string[] args){
-		int frame = 0;
-
+class test {
+	static int Main(string[] args) 	{
+		// setup engine, load resources and attach them
 		Engine engine = Engine.Init(400, 240, 1, 0, 20);
-		engine.LoadPath = "assets/sonic";
-		Tilemap foreground = Tilemap.FromFile("Sonic_md_fg1.tmx", null);
-		engine.Layers[0].SetMap(foreground);
+		engine.SetLoadPath("assets/sonic");
+		engine.Layers[0].Tilemap = Tilemap.FromFile("Sonic_md_fg1.tmx");
 
-		Window window = Window.Create(null, WindowFlags.Vsync);
-		while (window.Process ()){
-			window.DrawFrame(frame);
-			frame += 1;
-		}
+        // Create window & main loop
+        Window window = Window.Create(WindowFlags.Vsync);
+		while (window.Process())
+			window.DrawFrame();
 		return 0;
 	}
 }

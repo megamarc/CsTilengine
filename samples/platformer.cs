@@ -15,9 +15,9 @@ using Tilengine;
 class Platformer
 {
     // constants
-    const int Hres = 400;
-    const int Vres = 240;
-    const int NumBackgroundStrips = 6;
+    const int hres = 400;
+    const int vres = 240;
+    const int numBackgroundStrips = 6;
 
     // singleton instances
     static Engine engine;
@@ -36,50 +36,45 @@ class Platformer
     };
 
     static float posForeground = 0;
-    static float[] posBackground = new float[NumBackgroundStrips];
-    static float[] incBackground = new float[NumBackgroundStrips] { 0.562f, 0.437f, 0.375f, 0.625f, 1.0f, 2.0f };
-    static Layer foreground;
-    static Layer background;
+    static float[] posBackground = new float[numBackgroundStrips];
+    static float[] incBackground = new float[numBackgroundStrips] { 0.562f, 0.437f, 0.375f, 0.625f, 1.0f, 2.0f };
+    static Layer foregroundLayer;
+    static Layer backgroundLayer;
+    static Animation paletteAnimation;
 
-    /* helper for loading a related tileset + tilemap and configure the appropiate layer */
-    static void LoadLayer (Layer layer, string filename)
-    {
-        Tilemap tilemap = Tilemap.FromFile(filename, null);
-        layer.SetMap (tilemap);
-    }
-
-    /* entry point */
+    // entry point
     static int Main(string[] args)
     {
 	    int c;
         int frame = 0;
         float speed = 0;
 
-	    /* setup engine */
-        engine = Engine.Init(Hres, Vres, 2, 0, 20);
-        foreground = engine.Layers[0];
-        background = engine.Layers[1];
+	    // setup engine
+        engine = Engine.Init(hres, vres, 2, 0, 20);
+        foregroundLayer = engine.Layers[0];
+        backgroundLayer = engine.Layers[1];
+        paletteAnimation = engine.Animations[0];
 
-	    /* load resources*/
-        engine.LoadPath = "assets/sonic";
-        LoadLayer(foreground, "Sonic_md_fg1.tmx");
-        LoadLayer(background, "Sonic_md_bg1.tmx");
+        // load and attaches resources*/
+        engine.SetLoadPath("assets/sonic");
+        foregroundLayer.Tilemap = Tilemap.FromFile("Sonic_md_fg1.tmx");
+        backgroundLayer.Tilemap = Tilemap.FromFile("Sonic_md_bg1.tmx");
 
         // load sequences for animations
 	    SequencePack sp = SequencePack.FromFile("Sonic_md_seq.sqx");
-	    Sequence waterSequence = sp.Find ("seq_water");
-        Palette palette = background.Palette;
-        engine.Animations[0].SetPaletteAnimation(palette, waterSequence, true);
+	    Sequence waterSequence = sp.GetSequence("seq_water");
+        Palette palette = backgroundLayer.Palette;
+        paletteAnimation.Enable(palette, waterSequence, true);
 
-        /* setup raster callback */
+        // setup raster callback
         VideoCallback callback = new VideoCallback(MyRasterEffects);
         engine.SetRasterCallback(callback);
 
-        /* main loop */
-	    window = Window.Create(null, WindowFlags.Vsync);
+        // main loop
+	    window = Window.Create(WindowFlags.Vsync);
 	    while (window.Process ())
 	    {
-            /* inputs */
+            // inputs
 		    if (window.GetInput (Input.Right))
 		    {
 			    speed += 0.02f;
@@ -106,25 +101,21 @@ class Platformer
 				    speed = 0.0f;
 		    }
 
-		    /* scroll */
-		    posForeground += 3*speed;
-            foreground.SetPosition((int)posForeground,0);
-            for (c = 0; c < NumBackgroundStrips; c++)
+            // scroll
+            posForeground += 3*speed;
+            foregroundLayer.SetPosition((int)posForeground,0);
+            for (c = 0; c < numBackgroundStrips; c++)
 			    posBackground[c] += (incBackground[c] * speed);
 
-		    /* render to window */
-            window.DrawFrame(frame);
+		    // render to window
+            window.DrawFrame();
 		    frame++;
 	    }
-
-	    /* deinit */
-        sp.Delete();
-        engine.Deinit();
 
 	    return 0;
     }
 
-    /* raster effects (virtual HBLANK) */
+    // raster effects (virtual HBLANK)
     static void MyRasterEffects(int line)
     {
 	    float pos =- 1;
@@ -143,22 +134,22 @@ class Platformer
 		    pos = lerp (line, 152,224, (int)posBackground[4], (int)posBackground[5]);
 
 	    if (pos != -1)
-		    background.SetPosition((int)pos, 0);
+		    backgroundLayer.SetPosition((int)pos, 0);
     	
-	    /* background color gradients */
+	    // background color gradients
 	    if (line < 112)
             engine.SetBackgroundColor (InterpolateColor(line, 0, 112, skyColor[0], skyColor[1]));
 	    else if (line >= 144)
-            engine.SetBackgroundColor (InterpolateColor(line, 144, Vres, waterColor[0], waterColor[1]));
+            engine.SetBackgroundColor (InterpolateColor(line, 144, vres, waterColor[0], waterColor[1]));
     }
 
-    /* integer linear interploation */
+    // integer linear interploation
     static int lerp (int x, int x0,int x1, int fx0, int fx1)
     {
 	    return fx0 + (fx1 - fx0)*(x - x0)/(x1 - x0);
     }
 
-    /* color interpolation */
+    // color interpolation
     static Color InterpolateColor(int v, int v1, int v2, Color color1, Color color2)
     {
         return new Color(
