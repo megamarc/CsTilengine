@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 namespace Tilengine
 {
     /// <summary>
-    /// Tile data contained in each cell of a cref="Tilemap" object
+    /// Tile data contained in each cell of a Tilemap object
     /// </summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct Tile
@@ -98,7 +98,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Standard inputs query for cref="Window.GetInput()"
+    /// Standard inputs query for Window.GetInput()
     /// </summary>
     public enum Input
     {
@@ -132,7 +132,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Available blending modes for cref="Layer" and cref="Sprite"
+    /// Available blending modes for Layer and Sprite
     /// </summary>
     public enum Blend
     {
@@ -196,7 +196,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Data used to create cref="Spriteset" objects
+    /// Data used to create Spriteset objects
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public struct SpriteData
@@ -210,7 +210,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Data returned by cref="Spriteset.GetSpriteInfo" with dimensions of the requested sprite
+    /// Data returned by Spriteset.GetSpriteInfo with dimensions of the requested sprite
     /// </summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct SpriteInfo
@@ -220,7 +220,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Data returned by cref="Layer.GetTile" about a given tile inside a background layer
+    /// Data returned by Layer.GetTile about a given tile inside a background layer
     /// </summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct TileInfo
@@ -237,7 +237,7 @@ namespace Tilengine
     }
 
 	/// <summary>
-	/// Data returned by cref="ObjectList.GetInfo" about a given object inside an objects layer
+	/// Data returned by ObjectList.GetInfo about a given object inside an objects layer
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 	public struct ObjectInfo
@@ -257,7 +257,7 @@ namespace Tilengine
 	}
 
 	/// <summary>
-	/// Image Tile items for cref="Tileset.FromImages"
+	/// Image Tile items for Tileset.FromImages
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
 	public struct TileImage
@@ -288,7 +288,7 @@ namespace Tilengine
 	}	
 
     /// <summary>
-    /// cref="Tileset" attributes for constructor
+    /// Tileset attributes for constructor
     /// </summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
 	public struct TileAttributes
@@ -298,7 +298,7 @@ namespace Tilengine
 	}
 
     /// <summary>
-    /// Data used to define each frame of an animation for cref="Sequence" objects
+    /// Data used to define each frame of an animation for Sequence objects
     /// </summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct SequenceFrame
@@ -308,19 +308,19 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Data used to define each frame of a color cycle for cref="Sequence" objects
+    /// Data used to define each frame of a color cycle for Sequence objects
     /// </summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct ColorStrip
     {
-        public int Delay;
-        public byte First;
-        public byte Count;
-        public byte Dir;
+        public int Delay;   // delay for next keyframe, in frames
+        public byte First;  // first index of the palette strip to cnimate
+        public byte Count;  // number of colors starting from first to animate 
+        public byte Dir;    // direction of the animation (0 = forward, 1 = backward)
     }
 
     /// <summary>
-    /// Sequence info returned by cref="Sequence.GetInfo"
+    /// Sequence info returned by Sequence.GetInfo
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public struct SequenceInfo
@@ -336,6 +336,13 @@ namespace Tilengine
     public struct Color
     {
         public byte R,G,B;
+
+        /// <summary>
+        /// Constructor for RGB color
+        /// </summary>
+        /// <param name="r">Red component</param>
+        /// <param name="g">Green component</param>
+        /// <param name="b">Blue component</param>
         public Color(byte r, byte g, byte b)
         {
             R = r;
@@ -357,7 +364,7 @@ namespace Tilengine
 	}
 
     /// <summary>
-    /// pixel mapping for cref="Layer.SetPixelMapping"
+    /// pixel mapping for Layer.SetPixelMapping
     /// </summary>
 	public struct PixelMap
 	{
@@ -374,7 +381,18 @@ namespace Tilengine
         }
     }
 
+    /// <summary>
+    /// Prorotype por user-defined video callback functions.
+    /// </summary>
+    /// <param name="line">Scanline number being rendered (0 - vres)</param>
     public delegate void VideoCallback(int line);
+
+    /// <summary>
+    /// Prorotype for user-defined blend functions.
+    /// </summary>
+    /// <param name="src">Intensity of source RGB component</param>
+    /// <param name="dst">Intensity of destination RGB component</param>
+    /// <returns>Intensity of resulting RGB component</returns>
 	public delegate byte BlendFunction(byte src, byte dst);
 
     /// <summary>
@@ -668,8 +686,8 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Sets custom blend function to use in sprites or background layers when cref="Blend.Custom" mode
-		/// is selected with the cref="Layer.BlendMode" and cref="Sprite.BlendMode" properties.
+        /// Sets custom blend function to use in sprites or background layers when Blend.Custom mode
+		/// is selected with the Layer.BlendMode and Sprite.BlendMode properties.
         /// </summary>
         /// <param name="function">user-defined function to call when blending that takes
 		/// two integer arguments: source component intensity, destination component intensity, and returns
@@ -1349,7 +1367,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Returns layer horizontal position (scroll offset). Set with cref="SetPosition"/>
+        /// Returns layer horizontal position (scroll offset). Set with SetPosition/>
         /// </summary>
         public int X
         {
@@ -1357,7 +1375,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Returns layer vertical position (scroll offset). Set with cref="SetPosition"/>
+        /// Returns layer vertical position (scroll offset). Set with SetPosition/>
         /// </summary>
         public int Y
         {
@@ -1369,7 +1387,7 @@ namespace Tilengine
         /// </summary>
         /// <param name="tileset">Tileset object to set</param>
         /// <param name="tilemap">Tilemap object to set</param>
-        /// <remarks>Deprecated, use property cref="Tilemap" instead to configure a Tile layer</remarks>
+        /// <remarks>Deprecated, use property Tilemap instead to configure a Tile layer</remarks>
         public void Setup(Tileset tileset, Tilemap tilemap)
         {
             bool ok = TLN_SetLayer(index, tileset.ptr, tilemap.ptr);
@@ -1395,7 +1413,7 @@ namespace Tilengine
         /// <remarks>
         /// By default the scaling factor of a given layer is 1.0f, 1.0f, which means
         /// no scaling.Use values below 1.0 to downscale (shrink) and above 1.0 to upscale (enlarge).
-        /// Call cref="Reset" to disable scaling
+        /// Call Reset to disable scaling
         /// </remarks>
         public void SetScaling(float sx, float sy)
         {
@@ -1485,7 +1503,7 @@ namespace Tilengine
         /// <summary>
         /// Disables layer window clipping
         /// </summary>
-        /// <seealso cref="SetWindow"/>
+        /// <seealso cref="EnableWindow"/>
         public void DisableWindow()
         {
             bool ok = TLN_DisableLayerWindow(index);
@@ -1495,7 +1513,7 @@ namespace Tilengine
         /// <summary>
         /// Disables color processing for window
         /// </summary>
-        /// <seealso cref="SetWindowColor"/>
+        /// <seealso cref="EnableWindowColor"/>
         public void DisableWindowColor()
         {
             bool ok = TLN_DisableLayerWindowColor(index);
@@ -2326,7 +2344,7 @@ namespace Tilengine
         /// </summary>
         /// <param name="filename">TSX file to load</param>
         /// <returns>Reference to the newly loaded tileset</returns>
-        /// <remarks>An associated palette is also created, it can be obtained with the property cref="Tileset::Palette"</remarks>
+        /// <remarks>An associated palette is also created, it can be obtained with the property Tileset.Palette</remarks>
         public static Tileset FromFile(string filename)
         {
             IntPtr retval = TLN_LoadTileset(filename);
@@ -3011,7 +3029,7 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Creates an empty object list.that must be populated with cref="ObjectList.Add" />
+        /// Creates an empty object list.that must be populated with ObjectList.Add />
         /// </summary>
         public ObjectList()
         {
