@@ -38,8 +38,8 @@ namespace Tilengine
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct Tile
     {
-        public ushort index;
-        public ushort flags;
+        public ushort index;    //!< Tile index
+        public ushort flags;    //!< Combination of TileFlags values
     }
 
     /// <summary>
@@ -47,26 +47,26 @@ namespace Tilengine
     /// </summary>
     public enum Error
     {
-        Ok,              // No error
-        OutOfMemory,     // Not enough memory
-        IdxLayer,        // Layer index out of range
-        IdxSprite,       // Sprite index out of range
-        IdxAnimation,    // Animation index out of range
-        IdxPicture,      // Picture or tile index out of range
-        RefTileset,      // Invalid Tileset reference
-        RefTilemap,      // Invalid Tilemap reference
-        RefSpriteset,    // Invalid Spriteset reference   
-        RefPalette,      // Invalid Palette reference
-        RefSequence,     // Invalid Sequence reference   
-        RefSequencePack, // Invalid SequencePack reference
-        RefBitmap,       // Invalid Bitmap reference
-        NullPointer,     // Null pointer as argument
-        FileNotFound,    // Resource file not found
-        WrongFormat,     // Resource file has invalid format
-        WrongSize,       // A width or height parameter is invalid
-        Unsupported,     // Unsupported function
-        RefList,         // Invalid TLN_ObjectList reference
-        IdxPalette,      // Palette index out of range
+        Ok,              //!< No error
+        OutOfMemory,     //!< Not enough memory
+        IdxLayer,        //!< Layer index out of range
+        IdxSprite,       //!< Sprite index out of range
+        IdxAnimation,    //!< Animation index out of range
+        IdxPicture,      //!< Picture or tile index out of range
+        RefTileset,      //!< Invalid Tileset reference
+        RefTilemap,      //!< Invalid Tilemap reference
+        RefSpriteset,    //!< Invalid Spriteset reference   
+        RefPalette,      //!< Invalid Palette reference
+        RefSequence,     //!< Invalid Sequence reference   
+        RefSequencePack, //!< Invalid SequencePack reference
+        RefBitmap,       //!< Invalid Bitmap reference
+        NullPointer,     //!< Null pointer as argument
+        FileNotFound,    //!< Resource file not found
+        WrongFormat,     //!< Resource file has invalid format
+        WrongSize,       //!< A width or height parameter is invalid
+        Unsupported,     //!< Unsupported function
+        RefList,         //!< Invalid TLN_ObjectList reference
+        IdxPalette,      //!< Palette index out of range
         MaxError,        
     }	
 
@@ -82,8 +82,8 @@ namespace Tilengine
         S3 			= (3 << 2),
         S4 			= (4 << 2),
         S5 			= (5 << 2),
-        Nearest		= (1 << 6), // unfiltered upscaling
-		NoVsync 	= (1 << 7), // disable default vsync
+        Nearest		= (1 << 6), //!< Unfiltered upscaling
+		NoVsync 	= (1 << 7), //!< Disable default vsync
     }
 
     /// <summary>
@@ -117,10 +117,10 @@ namespace Tilengine
 		Quit,
 		CRT,
 
-        P1 = (Player.P1 << 4), // request player 1 input (default)
-        P2 = (Player.P2 << 4), // request player 2 input
-        P3 = (Player.P3 << 4), // request player 3 input
-        P4 = (Player.P4 << 4), // request player 4 input
+        P1 = (Player.P1 << 4), //!< Request player 1 input (default)
+        P2 = (Player.P2 << 4), //!< Request player 2 input
+        P3 = (Player.P3 << 4), //!< Request player 3 input
+        P4 = (Player.P4 << 4), //!< Request player 4 input
 
         /* compatibility symbols for pre-1.18 input model */
         Button_A = Button1,
@@ -152,13 +152,13 @@ namespace Tilengine
     /// </summary>
     public enum TileFlags
     {
-        None        = (0),          // no flags
-        FlipX       = (1 << 15),    // horizontal flip
-        FlipY       = (1 << 14),    // vertical flip
-        Rotate      = (1 << 13),    // transposes 90º
-        Priority    = (1 << 12),    // tile goes in front of regular sprites
-        Tileset     = (15 << 7),    // tileset index (0 - 15)
-        Palette     = (7 << 4),     // palette index (0 - 7)
+        None        = (0),          //!< No flags
+        FlipX       = (1 << 15),    //!< Horizontal flip
+        FlipY       = (1 << 14),    //!< Vertical flip
+        Rotate      = (1 << 13),    //!< Transposes 90º
+        Priority    = (1 << 12),    //!< Tile goes in front of regular sprites
+        Tileset     = (15 << 7),    //!< Tileset index (0 - 15)
+        Palette     = (7 << 4),     //!< Palette index (0 - 7)
     }
 
     /// <summary>
@@ -166,12 +166,12 @@ namespace Tilengine
     /// </summary>
     public enum SpriteFlags
     {
-        None        = (0),          // no flags
-        FlipX       = (1 << 15),    // horizontal flip
-        FlipY       = (1 << 14),    // vertical flip
-        Rotate      = (1 << 13),    // transposes 90º (only for square sprites)
-        Priority    = (1 << 12),    // sprite goes in front of priority tiles
-        Masked      = (1 << 11),    // sprite won't be drawn inside masked region
+        None        = (0),          //!< No flags
+        FlipX       = (1 << 15),    //!< Horizontal flip
+        FlipY       = (1 << 14),    //!< Vertical flip
+        Rotate      = (1 << 13),    //!< Transposes 90º (only for square sprites)
+        Priority    = (1 << 12),    //!< Sprite goes in front of priority tiles
+        Masked      = (1 << 11),    //!< Sprite won't be drawn inside masked region
     }
 
     /// <summary>
@@ -179,10 +179,10 @@ namespace Tilengine
     /// </summary>
     public enum LayerType
     {
-        None,       // undefined
-        Tile,       // tilemap-based layer
-        Object,     // objects layer
-        Bitmap,     // bitmapped layer
+        None,       //!< Undefined
+        Tile,       //!< Tilemap-based layer
+        Object,     //!< Objects layer
+        Bitmap,     //!< Bitmapped layer
     }
 
     /// <summary>
@@ -190,9 +190,9 @@ namespace Tilengine
     /// </summary>
     public enum LogLevel
     {
-        None,       // Don't print anything (default)
-        Errors,     // Print only runtime errors
-        Verbose,	// Print everything
+        None,       //!< Don't print anything (default)
+        Errors,     //!< Print only runtime errors
+        Verbose,	//!< Print everything
     }
 
     /// <summary>
@@ -202,11 +202,11 @@ namespace Tilengine
     public struct SpriteData
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-        public string Name;
-        public int X;
-        public int Y;
-        public int W;
-        public int H;
+        public string Name; //!< Name of the sprite image
+        public int X;       //!< Horizontal position of the sprite rectangle in the spriteset bitmap
+        public int Y;       //!< Vertical position of the sprite rectangle in the spriteset bitmap
+        public int W;       //!< Width of the sprite rectangle in pixels
+        public int H;       //!< Height of the sprite rectangle in pixels
     }
 
     /// <summary>
@@ -215,45 +215,46 @@ namespace Tilengine
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct SpriteInfo
     {
-        public int W;
-        public int H;
+        public int W;   //!< Width of the sprite gtaphic
+        public int H;   //!< Height of the sprite graphic
     }
 
     /// <summary>
-    /// Data returned by Layer.GetTile about a given tile inside a background layer
+    /// Data returned by Layer.GetTileInfo about a given tile inside a background layer
     /// </summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct TileInfo
     {
-        public ushort Index;
-        public ushort Flags;
-        public int Row;
-        public int Col;
-        public int Xoffset;
-        public int Yoffset;
-        public byte Color;
-        public byte Type;
-        public bool Empty;
+        public ushort Index;    //!< Tile index inside the tileset
+        public ushort Flags;    //!< Combination of TileFlags values
+        public int Row;         //!< Row in the tilemap (0 = topmost, 1 = second row...)
+        public int Col;         //!< Column in the tilemap (0 = leftmost, 1 = second column...)
+        public int Xoffset;     //!< horizontal pixel inside the tile
+        public int Yoffset;     //!< vertical pixel inside the tile
+        public byte Color;      //!< Color index inside the palette
+        public byte Type;       //!< Type of tile, values are user-defined
+        [MarshalAs(UnmanagedType.I1)]
+        public bool Empty;      //!< True if the cell is empty (no tile assigned), false if it has a tile assigned
     }
 
-	/// <summary>
-	/// Data returned by ObjectList.GetInfo about a given object inside an objects layer
-	/// </summary>
-	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    /// <summary>
+    /// Data returned by GetInfo about a given object inside an objects layer
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 	public struct ObjectInfo
 	{
-		public ushort Id;           // unique ID
-		public ushort Gid;          // graphic ID (tile index)
-		public ushort Flags;        // attributes (FlipX, FlipY, Priority...)
-		public int X;               // horizontal position
-		public int Y;               // vertical position
-		public int Width;           // horizontal size
-		public int Height;          // vertical size
-		public byte Type;           // type property
+		public ushort Id;           //!< Unique ID
+		public ushort Gid;          //!< Graphic ID (tile index)
+		public ushort Flags;        //!< Attributes (FlipX, FlipY, Priority...)
+		public int X;               //!< Horizontal position
+		public int Y;               //!< Vertical position
+		public int Width;           //!< Horizontal size
+		public int Height;          //!< Vertical size
+		public byte Type;           //!< Type property
 		[MarshalAs(UnmanagedType.I1)]
-		public bool Visible;        // visible property
+		public bool Visible;        //!< Object is rendered or not
 		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-		public string Name;         // name property
+		public string Name;         //!< Object name
 	}
 
 	/// <summary>
@@ -262,29 +263,29 @@ namespace Tilengine
 	[StructLayout(LayoutKind.Sequential)]
 	public struct TileImage
 	{
-		public IntPtr Bitmap;
-		public ushort Id;
-		public byte Type;
+		public IntPtr Bitmap;   //!< Pointer to unmanaged Bitmap
+		public ushort Id;       //!< Tile Id
+		public byte Type;       //!< Type of tile, values are user-defined
 	}
 
-	/// <summary>
-	/// Sprite state
-	/// </summary>
-	[StructLayout(LayoutKind.Sequential)]
+    /// <summary>
+    /// Sprite state
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
 	public struct SpriteState
 	{
-		public int X;                   // Screen position x
-		public int Y;                   // Screen position y
-		public int W;                   // Actual width in screen (after scaling)
-		public int H;                   // Actual height in screen (after scaling)
-		public SpriteFlags Flags;       // flags
-		public IntPtr Palette;          // Native palette reference
-		public IntPtr Spriteset;        // Native spriteset reference
-		public int Index;               // Graphic index inside spriteset
+		public int X;                   //!< Screen position x
+		public int Y;                   //!< Screen position y
+		public int W;                   //!< Actual width in screen (after scaling)
+		public int H;                   //!< Actual height in screen (after scaling)
+		public SpriteFlags Flags;       //!< flags
+		public IntPtr Palette;          //!< Native palette reference
+		public IntPtr Spriteset;        //!< Native spriteset reference
+		public int Index;               //!< Graphic index inside spriteset
 		[MarshalAs(UnmanagedType.I1)]
-		public bool Enabled;            // enabled or not
+		public bool Enabled;            //!< Enabled or not
 		[MarshalAs(UnmanagedType.I1)]
-		public bool Collision;          // per-pixel collision detection enabled or not
+		public bool Collision;          //!< Per-pixel collision detection enabled or not
 	}	
 
     /// <summary>
@@ -293,8 +294,9 @@ namespace Tilengine
     [StructLayoutAttribute(LayoutKind.Sequential)]
 	public struct TileAttributes
 	{
-		public byte Type;		// type of tile
-		public bool Priority;	// priority bit set
+		public byte Type;		//!< Type of tile
+        [MarshalAs(UnmanagedType.I1)]
+        public bool Priority;	//!< Priority bit set
 	}
 
     /// <summary>
@@ -303,8 +305,8 @@ namespace Tilengine
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct SequenceFrame
     {
-	    public int Index;	// tile/sprite index
-	    public int Delay;	// delay for next frame
+	    public int Index;	//!< Tile/sprite index
+	    public int Delay;	//!< Delay for next frame, in frames
     }
 
     /// <summary>
@@ -313,10 +315,10 @@ namespace Tilengine
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct ColorStrip
     {
-        public int Delay;   // delay for next keyframe, in frames
-        public byte First;  // first index of the palette strip to cnimate
-        public byte Count;  // number of colors starting from first to animate 
-        public byte Dir;    // direction of the animation (0 = forward, 1 = backward)
+        public int Delay;   //!< Delay for next keyframe, in frames
+        public byte First;  //!< First index of the palette strip to cnimate
+        public byte Count;  //!< Number of colors starting from first to animate 
+        public byte Dir;    //!< Direction of the animation (0 = forward, 1 = backward)
     }
 
     /// <summary>
@@ -326,8 +328,8 @@ namespace Tilengine
     public struct SequenceInfo
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string Name;	    // sequence name
-        public int NumFrames;	// number of frames
+        public string Name;	    //!< Sequence name
+        public int NumFrames;	//!< Number of frames
     }
 
     /// <summary>
@@ -382,7 +384,7 @@ namespace Tilengine
     }
 
     /// <summary>
-    /// Prorotype por user-defined video callback functions.
+    /// Prorotype por user-defined video callback functions. Used to emulate H-Blank and V-Blank interrupts
     /// </summary>
     /// <param name="line">Scanline number being rendered (0 - vres)</param>
     public delegate void VideoCallback(int line);
@@ -403,13 +405,13 @@ namespace Tilengine
         // singleton
         private static Engine instance = null;
 
-        public Layer[] Layers;
-		public Sprite[] Sprites;
-		public Animation[] Animations;
+        public Layer[] Layers;          //!< Array of layers, length specified in Engine.Init
+		public Sprite[] Sprites;        //!< Array of sprites, length specified in Engine.Init
+        public Animation[] Animations;  //!< Array of animations, length specified in Engine.Init
 
-        public int Width;		// Width in pixels of the framebuffer
-        public int Height;		// Height in pixels of the framebuffer
-        public uint Version;	// Tilengine dll version, in a 32-bit integer
+        public int Width;		//!< Width in pixels of the framebuffer, specified in Engine.Init
+        public int Height;		//!< Height in pixels of the framebuffer, specified in Engine.Init
+        public uint Version;	//!< Tilengine dll version, in a 32-bit integer
 
         [DllImport("Tilengine")]
         private static extern IntPtr TLN_Init(int hres, int vres, int numlayers, int numsprites, int numanimations);
@@ -558,6 +560,9 @@ namespace Tilengine
         /// <param name="numAnimations">number of animations</param>
         /// <returns>Engine instance</returns>
         /// <remarks>This is a singleton object: calling Init multiple times will return the same reference</remarks>
+        /// \code
+        /// var engine = Engine.Init(320, 240, 2, 80, 16); // Initialize with a resolution of 320x240, 2 layers, 80 sprites and 16 animations
+        /// \endcode
         public static Engine Init(int hres, int vres, int numLayers, int numSprites, int numAnimations)
         {
             // singleton
@@ -589,24 +594,11 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Returns the number of objets used by the engine so far
-        /// </summary>
-        public uint NumObjects
-        {
-            get { return TLN_GetNumObjects(); }
-        }
-
-        /// <summary>
-        /// Returns the total amount of memory used by the objects so far
-        /// </summary>
-        public uint UsedMemory
-        {
-            get { return TLN_GetUsedMemory(); }
-        }
-
-        /// <summary>
         /// Sets the background color, that is the color of the pixel when there isn't any layer or sprite at that position
         /// </summary>
+        /// \code
+        /// engine.SetBackgroundColor(Color(185, 225, 237)); // Sets background color to sky blue
+        /// \endcode
         public void SetBackgroundColor(Color value)
         {
             TLN_SetBGColor(value.R, value.G, value.B);
@@ -615,6 +607,10 @@ namespace Tilengine
         /// <summary>
         /// Sets the background color from a tilemap, that is the color of the pixel when there isn't any layer or sprite at that position
         /// </summary>
+        /// \code
+        /// var tilemap = Tilemap.FromFile("background.tmx");
+        /// engine.SetBackgroundColor(tilemap); // Sets background color from tilemap
+        /// \endcode
         public void SetBackgroundColor(Tilemap tilemap)
         {
             TLN_SetBGColorFromTilemap(tilemap.ptr);
@@ -630,17 +626,25 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Sets an optional, static bitmap as background instead of a solid color
+        /// Sets an optional, static bitmap as background instead of a solid color. Pass null to disable
         /// </summary>
-        public void SetBackgroundBitmap(Bitmap  bitmap)
+        /// \code
+        /// var bitmap = Bitmap.FromFile("background.png");
+        /// engine.SetBackgroundBitmap(bitmap); // Sets background bitmap
+        /// \endcode
+        public void SetBackgroundBitmap(Bitmap bitmap)
         {
             bool ok = TLN_SetBGBitmap(bitmap != null? bitmap.ptr : IntPtr.Zero);
             Engine.ThrowException(ok);
         }
 
         /// <summary>
-        /// Sets the palette for the optional background bitmap
+        /// Sets the palette for the optional background bitmap, overriding the original palette from the bitmap
         /// </summary>
+        /// \code
+        /// var palette = Palette.FromFile("background.pal");
+        /// engine.SetBackgroundPalette(palette); // Sets background palette
+        /// \endcode
         public void SetBackgroundPalette(Palette palette)
         {
             bool ok = TLN_SetBGPalette(palette != null? palette.ptr : IntPtr.Zero);
@@ -648,21 +652,16 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Sets the output surface for rendering
-        /// </summary>
-        /// <param name="data">Array of bytes that will hold the render target</param>
-        /// <param name="pitch">Number of bytes per each scanline of the framebuffer</param>
-        /// <remarks>The render target pixel format must be 32 bits RGBA</remarks>
-        public void SetRenderTarget(byte[] data, int pitch)
-        {
-            TLN_SetRenderTarget(data, pitch);
-        }
-
-        /// <summary>
         /// Enables raster effects processing, like a virtual HBLANK interrupt where
         /// any render parameter can be modified between scanlines.
         /// </summary>
-        /// <param name="callback">name of the user-defined function to call for each scanline. Set Null to disable.</param>
+        /// <param name="callback">name of the user-defined function to call for each scanline. Pass null to disable.</param>
+        /// \code
+        /// void myRasterCallback(int numScanLine) {
+        ///   // TODO: do raster effects based on scanline number
+        /// }
+        /// engine.SetRasterCallback(myRasterCallback); // Sets raster callback to be executed for each scanline
+        /// \endcode
         public void SetRasterCallback(VideoCallback callback)
         {
             TLN_SetRasterCallback(callback);
@@ -671,7 +670,7 @@ namespace Tilengine
         /// <summary>
         /// Enables user callback for each drawn frame, like a virtual VBLANK interrupt
         /// </summary>
-        /// <param name="callback">name of the user-defined function to call for each frame. Set Null to disable.</param>
+        /// <param name="callback">name of the user-defined function to call for each frame. Pass null to disable.</param>
         public void SetFrameCallback(VideoCallback callback)
         {
             TLN_SetFrameCallback(callback);
@@ -693,28 +692,32 @@ namespace Tilengine
 		/// two integer arguments: source component intensity, destination component intensity, and returns
 		/// the desired intensity.
         /// </param>
+        /// \code
+        /// myBlendFunction(byte src, byte dst) {
+        ///     return (byte)((src + dst) / 2); // simple average 50%
+        ///     
+        /// engine.SetCustomBlendFunction(myBlendFunction);
+        /// engine.Layers[0].SetBlendMode(Blend.Custom); // Set layer to use custom blend function
+        /// \endcode
         public void SetCustomBlendFunction(BlendFunction function)
         {
             TLN_SetCustomBlendFunction(function);
         }
 
         /// <summary>
-        /// Starts active rendering of the current frame
+        /// Sets the output surface for rendering
         /// </summary>
-        /// <param name="frame">Timestamp value</param>
-        /// <remarks>This method is used for active rendering combined with DrawNextScanline(), instead of using delegates for raster effects</remarks>
-        public void BeginFrame(int frame)
+        /// <param name="data">Array of bytes that will hold the render target</param>
+        /// <param name="pitch">Number of bytes per each scanline of the framebuffer</param>
+        /// <remarks>The render target pixel format must be 32 bits RGBA. Use for custom surface rendering
+        /// instead of using the provided Window facility.</remarks>
+        /// \code
+        /// byte renderTarget = new byte[engine.Width * engine.Height * 4]; // Create a render target buffer
+        /// engine.setRenderTarget(renderTarget, engine.Width * 4); // Set the render target buffer
+        /// \endcode
+        public void SetRenderTarget(byte[] data, int pitch)
         {
-            TLN_BeginFrame(frame);
-        }
-
-        /// <summary>
-        /// Draws the next scanline of the frame when doing active rendering (without delegates)
-        /// </summary>
-        /// <returns>true if there are still scanlines to draw or false when the frame is complete</returns>
-        public bool DrawNextScanline()
-        {
-            return TLN_DrawNextScanline();
+            TLN_SetRenderTarget(data, pitch);
         }
 
         /// <summary>
@@ -754,19 +757,17 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Sets/gets desired target frames per second, by default 60
-        /// </summary>
-        public int TargetFPS
-        {
-            set { TLN_SetTargetFps(value); }
-            get { return TLN_GetTargetFps(); }
-        }
-
-        /// <summary>
         /// Sets one of the eight global palettes used by tiled layers
         /// </summary>
         /// <param name="index">Palette index [0 - 7]</param>
         /// <param name="palette">Reference of palette to set, or NULL to disable it</param>
+        /// <remarks>Tiles in a tilemap have an attribute that allows to select which palette to use on each individual tile
+        /// By default, all tiles in the layer use the palette provided by the tileset
+        /// </remarks>
+        /// \code
+        /// var palette = Palette.FromFile("palette3.act");
+        /// engine.SetGlobalPalette(3, palette); // Sets global palette 3 to the given palette
+        /// \endcode
         public void SetGlobalPalette(int index, Palette palette)
         {
             bool ok = TLN_SetGlobalPalette(index, palette.ptr);
@@ -777,7 +778,7 @@ namespace Tilengine
         /// Returns one of the eight global palettes
         /// </summary>
         /// <param name="index">Index of global palette to query [0 - 7]</param>
-        /// <returns>Palette reference or NULL if not set</returns>
+        /// <returns>Palette reference or null if not set</returns>
         public Palette GetGlobalPalette(int index)
         {
             IntPtr value = TLN_GetGlobalPalette(index);
@@ -815,6 +816,9 @@ namespace Tilengine
         /// <summary>
         /// Verbosity of trace messages
         /// </summary>
+        /// \code
+        /// engine.SetLogLevel(LogLevel.Verbose); // Sets log level to verbose
+        /// \endcode
         public void SetLogLevel(LogLevel value)
         {
             TLN_SetLogLevel((int)value);
@@ -825,6 +829,7 @@ namespace Tilengine
         /// </summary>
         /// <param name="tmxfile">TMX file to load</param>
         /// <param name="first_layer">Index of the first layer to place layers read from the file</param>
+        /// <remarks>Use in conjunction with Engine.SetPosition and Sprite.SetWorldPosition</remarks>
         public void OpenWorld(string tmxfile, int first_layer = 0)
         {
             bool ok = TLN_LoadWorld(tmxfile, first_layer);
@@ -832,10 +837,10 @@ namespace Tilengine
         }
 
         /// <summary>
-        /// Sets the world position, that is the top-left corner of the screen in world coordinates. All layers and attached sprites are moved accordingly. Requires world mode to be enabled with OpenWorld() method.
+        /// Sets the world position, that is the top-left corner of the screen in world coordinates. All layers and attached sprites are moved accordingly. Requires world mode to be enabled with Engine.OpenWorld method.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
+        /// <param name="x">Horizontal position</param>
+        /// <param name="y">Vertical position</param>
         public void SetPosition(int x, int y)
         {
             TLN_SetWorldPosition(x, y);
@@ -847,6 +852,31 @@ namespace Tilengine
         public void CloseWorld()
         {
             TLN_ReleaseWorld();
+        }
+
+        /// <summary>
+        /// Returns the number of objets used by the engine so far
+        /// </summary>
+        public uint NumObjects
+        {
+            get { return TLN_GetNumObjects(); }
+        }
+
+        /// <summary>
+        /// Returns the total amount of memory used by the objects so far
+        /// </summary>
+        public uint UsedMemory
+        {
+            get { return TLN_GetUsedMemory(); }
+        }
+
+        /// <summary>
+        /// Sets/gets desired target frames per second, by default 60
+        /// </summary>
+        public int TargetFPS
+        {
+            set { TLN_SetTargetFps(value); }
+            get { return TLN_GetTargetFps(); }
         }
     }
 
@@ -1607,8 +1637,8 @@ namespace Tilengine
         /// <summary>
         /// Overrides the default layer parallax factor, which is used to calculate the position of the layer in world coordinates when world mode is enabled (see Engine.OpenWorld)
         /// </summary>
-        /// <param name="x">Horizontal parallax factor (1.0 means 1:1 pixel/world ratio)</param>
-        /// <param name="y">Horizontal parallax factor</param>
+        /// <param name="px">Horizontal parallax factor (1.0 means 1:1 pixel/world ratio)</param>
+        /// <param name="py">Horizontal parallax factor</param>
         public void SetParallaxFactor(float px, float py)
         {
             bool ok = TLN_SetLayerParallaxFactor(index, px, py);
@@ -1686,34 +1716,34 @@ namespace Tilengine
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_GetSpriteState(int nsprite, out SpriteState state);
+        private static extern bool TLN_GetSpriteState(int nsprite, out SpriteState state);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetFirstSprite(int nsprite);
+        private static extern bool TLN_SetFirstSprite(int nsprite);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetNextSprite(int nsprite, int next);
+        private static extern bool TLN_SetNextSprite(int nsprite, int next);
 
         [DllImport("Tilengine")]
-        public static extern void TLN_SetSpritesMaskRegion(int top_line, int bottom_line);
-
-        [DllImport("Tilengine")]
-        [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_SetSpriteAnimation(int nsprite, IntPtr sequence, int loop);
+        private static extern void TLN_SetSpritesMaskRegion(int top_line, int bottom_line);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_DisableSpriteAnimation(int nsprite);
+        private static extern bool TLN_SetSpriteAnimation(int nsprite, IntPtr sequence, int loop);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_PauseSpriteAnimation(int index);
+        private static extern bool TLN_DisableSpriteAnimation(int nsprite);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        public static extern bool TLN_ResumeSpriteAnimation(int index);
+        private static extern bool TLN_PauseSpriteAnimation(int index);
+
+        [DllImport("Tilengine")]
+        [return: MarshalAsAttribute(UnmanagedType.I1)]
+        private static extern bool TLN_ResumeSpriteAnimation(int index);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -3002,10 +3032,10 @@ namespace Tilengine
         [DllImport("Tilengine")]
         private static extern int TLN_GetListNumObjects(IntPtr list);
 
-        // TODO implmentment this function to get the object info. TLN_GetListObject allows info to be null, but C# doesn't
+        /// TODO implmentment this function to get the object info. TLN_GetListObject allows info to be null, but C# doesn't
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
-        private static extern bool TLN_GetListObject(IntPtr list, out ObjectInfo info);
+        private static extern bool TLN_GetListObject(IntPtr list, IntPtr ptrInfo);
 
         [DllImport("Tilengine")]
         [return: MarshalAsAttribute(UnmanagedType.I1)]
